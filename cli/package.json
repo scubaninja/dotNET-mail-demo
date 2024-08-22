@@ -1,0 +1,31 @@
+{
+  "name": "cli",
+  "version": "1.0.0",
+  "main": "./bin/mail.js",
+  "bin": {
+    "azx": "./bin/mail.js"
+  },
+  "scripts": {
+    "test": "mocha --recursive",
+    "dev": "node ./bin/mdmail.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@inquirer/prompts": "^4.0.0",
+    "axios": "^1.6.7",
+    "cli-highlight": "^2.1.11",
+    "cli-spinner": "^0.2.10",
+    "commander": "^12.0.0",
+    "consola": "^3.2.3",
+    "dotenv": "^16.4.1",
+    "gray-matter": "^4.0.3",
+    "lodash": "^4.17.21",
+    "marked": "^12.0.0"
+  },
+  "devDependencies": {
+    "mocha": "^10.2.0"
+  }
+}

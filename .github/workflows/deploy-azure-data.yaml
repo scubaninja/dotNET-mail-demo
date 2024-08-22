@@ -1,0 +1,40 @@
+name: Deploy azure-data
+
+on:
+  #push:
+  #  branches: ['latest']
+  workflow_dispatch:
+
+permissions:
+      id-token: write
+      contents: read
+
+jobs:
+  mage:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      -
+        name: Azure login
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      -
+        name: Checkout
+        uses: actions/checkout@v4
+      -
+        name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.21
+      -
+        name: Run Mage
+        uses: magefile/mage-action@v3
+        with:
+          version: latest
+          #args: deploy:group 240100-tailwind-traders eastus
+          args: deploy:storageandpostgres 240100-tailwind-traders-data
+          workdir: jobs
+          install_only: false

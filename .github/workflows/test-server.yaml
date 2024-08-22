@@ -1,0 +1,71 @@
+name: Test server
+
+on:
+  push:
+    branches: ['latest']
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v4
+      -
+        name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.21
+      # -
+      #   name: Run Mage
+      #   uses: magefile/mage-action@v3
+      #   with:
+      #     version: latest
+      #     args: deploy:test 240100-tt-mail
+      #     workdir: jobs/deploy
+      #     install-only: false
+      - 
+        name: Setup .NET 8.x
+        uses: actions/setup-dotnet@v3
+        with:
+          # Semantic version range syntax or exact version of a dotnet version
+          dotnet-version: '8.x'
+      -
+        name: Test server
+        shell: bash
+        run: |
+          docker run --rm \
+            -p 5432:5432 \
+            -e POSTGRES_USER=user \
+            -e POSTGRES_HOST_AUTH_METHOD=trust \
+            -e POSTGRES_DB=tailwind \
+            --name postgres \
+            -d postgres
+
+          until [ `docker ps --filter "name=postgres" --format "{{.Names}}"` ]; do
+              echo "waiting for postgres container...";
+              sleep 1;
+          done;
+
+          until [ "`docker inspect -f {{.State.Status}} postgres`" = "running" ]; do
+              echo "waiting for postgres container to be running...";
+              sleep 1;
+          done;
+
+          echo "sleep 5 seconds"
+          sleep 5
+
+          export PGHOST=localhost
+          export PGUSER=user
+
+          cd server
+
+          cat >.env <<EOL
+          ASPNETCORE_ENVIRONMENT=Development
+          DATABASE_URL=Host=localhost;Database=tailwind;Username=user;
+          EOL
+
+          make test
+
+          docker rm -f postgres
