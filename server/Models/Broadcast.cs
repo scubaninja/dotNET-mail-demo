@@ -3,55 +3,54 @@ using Dapper;
 using System.Data;
 namespace Tailwind.Mail.Models;
 
-//The process of creating a broadcast is:
-//The initial data is created first (name, slug)
-//The the email and finally the segment to send to, which is done by tag (or not)
-//If the initial use case is using a markdown document, then it should contain all 
-//that we need
+// Proces tworzenia broadcastu jest następujący:
+// Najpierw tworzone są dane początkowe (nazwa, slug)
+// Następnie email i segment do wysłania, który jest określany przez tag (lub nie)
+// Jeśli początkowy przypadek użycia korzysta z dokumentu markdown, to powinien zawierać wszystko, czego potrzebujemy
 [Table("broadcasts", Schema = "mail")]
 public class Broadcast {
+  /// <summary>
+  /// Identyfikator broadcastu.
+  /// </summary>
   public int? ID { get; set; }
+
+  /// <summary>
+  /// Identyfikator emaila.
+  /// </summary>
   public int? EmailId { get; set; }
+
+  /// <summary>
+  /// Status broadcastu, domyślnie ustawiony na "pending".
+  /// </summary>
   public string Status { get; set; } = "pending";
+
+  /// <summary>
+  /// Nazwa broadcastu.
+  /// </summary>
   public string? Name { get; set; }
+
+  /// <summary>
+  /// Slug broadcastu.
+  /// </summary>
   public string? Slug { get; set; }
+
+  /// <summary>
+  /// Adres email do odpowiedzi.
+  /// </summary>
   public string? ReplyTo { get; set; }
+
+  /// <summary>
+  /// Tag określający segment do wysłania, domyślnie ustawiony na "*".
+  /// </summary>
   public string SendToTag { get; set; } = "*";
+
+  /// <summary>
+  /// Data i czas utworzenia broadcastu, domyślnie ustawiony na bieżący czas UTC.
+  /// </summary>
   public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
+
+  /// <summary>
+  /// Prywatny konstruktor, który uniemożliwia bezpośrednie tworzenie instancji klasy Broadcast z zewnątrz.
+  /// </summary>
   private Broadcast()
-  {
-    
-  }
-  public static Broadcast FromMarkdownEmail(MarkdownEmail doc){
-    var broadcast = new Broadcast();
-    broadcast.Name = doc.Data.Subject;
-    broadcast.Slug = doc.Data.Slug;
-    broadcast.SendToTag = doc.Data.SendToTag;
-    return broadcast;
-  }
-  public static Broadcast FromMarkdown(string markdown){
-    var broadcast = new Broadcast();
-    var doc = MarkdownEmail.FromString(markdown);
-    broadcast.Name = doc.Data.Subject;
-    broadcast.Slug = doc.Data.Slug;
-    broadcast.SendToTag = doc.Data.SendToTag;
-    return broadcast;
-  }
-  public long ContactCount(IDbConnection conn){
-    //do we have a tag?
-    long contacts = 0;
-    if(SendToTag == "*"){
-      contacts = conn.ExecuteScalar<long>("select count(1) from mail.contacts where subscribed = true");
-    }else{
-      var sql = @"
-        select count(1) as count from mail.contacts 
-        inner join mail.tagged on mail.tagged.contact_id = mail.contacts.id
-        inner join mail.tags on mail.tags.id = mail.tagged.tag_id
-        where subscribed = true
-        and tags.slug = @tagSlug
-      ";
-      contacts = conn.ExecuteScalar<long>(sql, new {tagSlug = SendToTag});
-    }
-    return contacts;
-  }
 }
