@@ -39,5 +39,4 @@ public class Broadcast {
     
   }
   
-  // Indlela ye-static yokudala i-broadcast kusuka kudokhumenti ye-MarkdownEmail
-  public static Broadcast FromMarkdownEmail(MarkdownEmail doc){
+  // Indlela ye
