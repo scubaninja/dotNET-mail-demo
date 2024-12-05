@@ -14,7 +14,7 @@ program.command("tag")
     const fileName = file.indexOf(".csv") > 0 ? file : file + ".csv";
     const csvPath = path.resolve(__dirname, "../csvs", `${fileName}`)
     const text = fs.readFileSync(csvPath, "utf-8");
-    const emails = text.replace("\"", "").split("\n").filter(e => e.indexOf("@") > 0);
+    const emails = text.replace(/"/g, "").split("\n").filter(e => e.indexOf("@") > 0);
     //we need to validate this somehow
     if(emails.length > 0){
       let confirmed = await confirm({message: `There are ${emails.length} contacts in your list. Proceed  (Y | n)?`, default: true});
