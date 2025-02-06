@@ -2,7 +2,7 @@ using Tailwind.Data;
 using Dapper;
 using System.Data;
 namespace Tailwind.Mail.Models;
-
+ some changes
 [Table("broadcasts", Schema = "mail")]
 public class Broadcast {
   public int? ID { get; set; }
