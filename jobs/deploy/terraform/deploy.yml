@@ -1,0 +1,49 @@
+name: Deploy to Azure
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  terraform:
+    name: 'Terraform'
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 'Checkout GitHub Action'
+      uses: actions/checkout@v2
+
+    - name: 'Set up Terraform'
+      uses: hashicorp/setup-terraform@v1
+      with:
+        terraform_version: 1.0.11
+
+    - name: 'Terraform Init'
+      run: terraform init
+
+    - name: 'Terraform Validate'
+      run: terraform validate
+
+    - name: 'Terraform Plan'
+      run: terraform plan
+
+    - name: 'Run Terratest'
+      run: go test -v -run TestTerraform
+      env:
+        ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+
+    - name: 'Terraform Apply'
+      if: github.ref == 'refs/heads/main'
+      run: terraform apply -auto-approve
+      env:
+        ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
