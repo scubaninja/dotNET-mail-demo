@@ -69,3 +69,54 @@ jobs:
           make test
 
           docker rm -f postgres
+
+  xunit-tests:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup .NET 8.x
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.x'
+      - name: Run xunit tests
+        run: |
+          cd server
+          dotnet test --logger:trx
+
+  playwright-tests:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup .NET 8.x
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.x'
+      - name: Install Playwright
+        run: |
+          cd server
+          dotnet tool install --global Microsoft.Playwright.CLI
+          export PATH="$PATH:~/.dotnet/tools"
+          playwright install
+      - name: Run Playwright tests
+        run: |
+          cd server
+          dotnet test --filter FullyQualifiedName~AccessibilityTests
+
+  mock-api-tests:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup .NET 8.x
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.x'
+      - name: Run mock API tests
+        run: |
+          cd server
+          dotnet test --filter FullyQualifiedName~ApiTests

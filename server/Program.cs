@@ -1,4 +1,3 @@
-
 using Microsoft.OpenApi.Models;
 using Tailwind.Data;
 using Tailwind.Mail.Services;
@@ -52,3 +51,73 @@ app.Run();
 
 //this is for tests
 public partial class Program { }
+
+// New method to configure services for testing
+public static void ConfigureServicesForTesting(IServiceCollection services)
+{
+    services.AddEndpointsApiExplorer();
+    services.AddScoped<IDb, DB>();
+    services.AddScoped<IEmailSender, SmtpEmailSender>();
+    services.AddSwaggerGen(options =>
+    {
+        options.SwaggerDoc("v1", new OpenApiInfo
+        {
+            Version = "0.0.1",
+            Title = "Tailwind Traders Mail Services API",
+            Description = "Transactional and bulk email sending services for Tailwind Traders.",
+            Contact = new OpenApiContact
+            {
+                Name = "Rob Conery, Aaron Wislang, and the Tailwind Traders Team",
+                Url = new Uri("https://tailwindtraders.dev")
+            },
+            License = new OpenApiLicense
+            {
+                Name = "MIT",
+                Url = new Uri("https://opensource.org/license/mit/")
+            }
+        });
+    });
+}
+
+// New method to configure middleware for testing
+public static void ConfigureMiddlewareForTesting(WebApplication app)
+{
+    app.UseSwagger();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
+        options.RoutePrefix = string.Empty;
+    });
+}
+
+// New method to configure endpoints for testing
+public static void ConfigureEndpointsForTesting(WebApplication app)
+{
+    Tailwind.Mail.Api.PublicRoutes.MapRoutes(app);
+    Tailwind.Mail.Api.Admin.BroadcastRoutes.MapRoutes(app);
+    Tailwind.Mail.Api.Admin.ContactRoutes.MapRoutes(app);
+    Tailwind.Mail.Api.Admin.BulkOperationRoutes.MapRoutes(app);
+}
+
+// New method to configure Swagger for testing
+public static void ConfigureSwaggerForTesting(WebApplication app)
+{
+    app.UseSwagger();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
+        options.RoutePrefix = string.Empty;
+    });
+}
+
+// New method to configure the application for testing
+public static WebApplication ConfigureApplicationForTesting(string[] args)
+{
+    var builder = WebApplication.CreateBuilder(args);
+    ConfigureServicesForTesting(builder.Services);
+    var app = builder.Build();
+    ConfigureMiddlewareForTesting(app);
+    ConfigureEndpointsForTesting(app);
+    ConfigureSwaggerForTesting(app);
+    return app;
+}
