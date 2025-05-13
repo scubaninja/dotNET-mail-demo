@@ -1,0 +1,28 @@
+{
+  "coding_style": {
+    "indentation": "spaces",
+    "spaces_per_indent": 4,
+    "naming_convention": {
+      "variables": "camelCase",
+      "methods": "PascalCase",
+      "constants": "ALL_CAPS"
+    },
+    "brace_style": "K&R",
+    "use_comments": "xml-doc"
+  },
+  "preferred_libraries": [
+    "System.Collections.Generic",
+    "System.Linq",
+    "Newtonsoft.Json"
+  ],
+  "project_structure": {
+    "use_regions": true,
+    "file_naming": "MatchClassName",
+    "folder_structure": "by-domain-layer"
+  },
+  "disallowed_functions": [
+    "Console.WriteLine",
+    "Thread.Sleep"
+  ],
+  "notes": "Follow .NET coding guidelines, prefer async/await for asynchronous operations, and avoid blocking calls."
+}
