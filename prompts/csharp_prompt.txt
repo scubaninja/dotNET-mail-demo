@@ -1,0 +1,23 @@
+## Project Overview
+Enhance the **dotNET-mail-demo** project by improving email sending functionality and adding robust unit tests.
+
+## Requirements
+- Implement an **EmailService** class that:
+  - Sends transactional emails via API.
+  - Supports batch email sending using predefined segments.
+  - Uses FluentEmail or another email library for templating.
+- Ensure **error handling** for failed email deliveries.
+- Write **unit tests** using xUnit to validate email sending logic.
+- Implement **logging** for email transactions using Serilog.
+- Follow **clean architecture principles** and **dependency injection**.
+
+## Test Cases (Using xUnit)
+- Verify that `SendEmail("test@example.com", "Subject", "Body")` successfully sends an email.
+- Ensure that sending an email to an invalid address throws an appropriate exception.
+- Validate batch email sending functionality.
+- Test logging behavior to confirm email transactions are recorded.
+
+## Additional Guidelines
+- Use **async/await** for non-blocking email operations.
+- Follow **SOLID principles** for maintainability.
+- Generate XML documentation (`/// <summary>...</summary>`) for all public methods.

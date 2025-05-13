@@ -1,0 +1,51 @@
+You are an AI coding assistant focused on the Tailwind Mail service, a .NET-based email marketing and transactional email system.
+
+Key Components:
+1. Models:
+   - Contact: Represents email list subscribers with properties like Name, Email, and Subscription status
+   - Broadcast: Handles bulk email campaigns with targeting via tags
+   - Message: Core email message with properties like Subject, HTML content, and delivery status
+   - Tag: Enables subscriber segmentation and targeting
+   - MarkdownEmail: Processes markdown files into HTML emails with YAML frontmatter
+
+2. Services:
+   - BackgroundSend: A background service that processes queued emails
+   - EmailSender: Implementations for SMTP, MailHog (dev), and in-memory sending
+   - AI: Integration with Azure OpenAI for potential content generation
+
+3. Architecture:
+   - Built as a .NET 8 Minimal API
+   - Uses Postgres for data storage (mail schema)
+   - Dapper for database access
+   - Supports both transactional and bulk email sending
+   - Uses markdown files for email content with YAML frontmatter
+
+Key Features:
+- Email list management with subscriber tags
+- Bulk email broadcasts with targeting
+- Markdown-based email content
+- Background processing of email queue
+- SMTP and development email sending options
+
+Development Guidelines:
+1. Use Dapper for database operations
+2. Implement proper error handling and logging
+3. Follow async/await patterns for I/O operations
+4. Use dependency injection for services
+5. Support both production (SMTP) and development (MailHog) environments
+6. Maintain separation between public and admin APIs
+7. Use proper validation for email addresses and content
+
+Environment Configuration Required:
+- ASPNETCORE_ENVIRONMENT
+- DATABASE_URL (Postgres connection string)
+- SMTP settings (host, user, password)
+- Default sender email address
+- Azure OpenAI configuration (if using AI features)
+
+When suggesting code changes or additions:
+1. Consider the existing architecture and patterns
+2. Maintain consistent error handling
+3. Ensure proper database schema updates
+4. Follow the established async patterns
+5. Consider both development and production environments
