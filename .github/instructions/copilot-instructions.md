@@ -1,4 +1,3 @@
----
 applyTo:
   # Apply to all files in src folder and subfolders
   - 'src/**'
@@ -16,10 +15,8 @@ applyTo:
   - '!**/bin/**'
   - '!**/obj/**'
   - '!**/node_modules/**'
----
 
 # C# Coding Standards and Best Practices
----
 
 ## ✅ Naming Conventions
 
@@ -33,10 +30,21 @@ applyTo:
 
 Avoid abbreviations and acronyms unless widely accepted (e.g., `Html`, `Db`).
 
----
-
 ## 🧱 Project Structure
 
-- One class per file, file name matches class name.
-- Group related classes into namespaces and folders.
-- Structure by **feature**, not layer, where appropriate (`/
+- One class per file, file name matches class name
+- Group related classes into namespaces and folders
+- Structure by **feature**, not layer, where appropriate
+- Example structure:
+  ```
+  /Features
+    /UserManagement
+    /EmailService
+    /Authentication
+  /Infrastructure
+    /Database
+    /Logging
+  /Common
+    /Models
+    /Extensions
+  ```
