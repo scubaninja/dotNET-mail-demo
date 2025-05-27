@@ -38,7 +38,7 @@ func (s *emailService) CreateFromMarkdown(markdown string) (*models.Email, error
 		HTML:    doc.HTML,
 	}
 
-	if err := s.repo.Create(context.Background(), email); err != nil {
+	if err := s.repo.Create(ctx, email); err != nil {
 		return nil, err
 	}
 
