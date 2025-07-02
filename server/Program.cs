@@ -2,6 +2,7 @@
 using Microsoft.OpenApi.Models;
 using Tailwind.Data;
 using Tailwind.Mail.Services;
+using Tailwind.Mail.Middleware;
 
 //load up the config from env and appsettings
 var config = Viper.Config("Integration");
@@ -10,6 +11,25 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddScoped<IDb, DB>();
 builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
+builder.Services.AddScoped<IDataProtectionService, DataProtectionService>();
+
+// Add Data Protection services
+builder.Services.AddDataProtection();
+
+// Add CORS policy
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("GdprCompliant", policy =>
+    {
+        policy.WithOrigins(
+                "https://tailwindtraders.dev",
+                "https://www.tailwindtraders.dev")
+            .AllowCredentials()
+            .WithHeaders("Content-Type", "Authorization")
+            .WithMethods("GET", "POST", "PUT", "DELETE", "OPTIONS");
+    });
+});
+
 if(config.Get("SEND_WORKER") == "local"){
     builder.Services.AddHostedService<BackgroundSend>();
 }
@@ -36,6 +56,18 @@ builder.Services.AddSwaggerGen(options =>
 
 var app = builder.Build();
 
+// Use HTTPS redirection in production
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
+
+// Add security headers middleware
+app.UseSecurityHeaders();
+
+// Use CORS
+app.UseCors("GdprCompliant");
+
 app.UseSwagger();
 app.UseSwaggerUI(options =>
 {
@@ -47,6 +79,7 @@ Tailwind.Mail.Api.PublicRoutes.MapRoutes(app);
 Tailwind.Mail.Api.Admin.BroadcastRoutes.MapRoutes(app);
 Tailwind.Mail.Api.Admin.ContactRoutes.MapRoutes(app);
 Tailwind.Mail.Api.Admin.BulkOperationRoutes.MapRoutes(app);
+Tailwind.Mail.Api.DataSubjectRequestsRoutes.MapRoutes(app);
 
 app.Run();
 
