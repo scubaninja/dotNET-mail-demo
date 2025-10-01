@@ -67,7 +67,14 @@ var broadcast = Broadcast.FromMarkdown(markdownContent);
 Contacts can be added with tags for segmentation:
 
 ```csharp
-// API endpoint or command for adding contacts with tags
+// Add a contact with tags
+var contact = new Contact
+{
+    Email = "jane.doe@example.com",
+    Name = "Jane Doe",
+    Tags = new List<string> { "customer", "newsletter", "vip" }
+};
+ContactRepository.Add(contact);
 ```
 
 ### Sending Emails
