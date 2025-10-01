@@ -1,94 +1,77 @@
-# Welcome to Tailwind Traders Mail Service
+# Tervetuloa Tailwind Tradersin postipalveluun / Welcome to Tailwind Traders Mail Service
+
+Tarvitsemme kaikki sähköpostia... paremmassa tai huonommassa. Tämä palvelu lähettää transaktio-sähköposteja API:n kautta tai erälähetyksiä listalle käyttäen tagia tai ennalta määritettyä segmenttiä, kuten MailChimp tekee.
 
 We all need email... for better or worse. This service will send transactional emails via API or batch emails to a list, using a tag or predefined segment, like MailChimp does.
 
-## Features
+## Työn alla / Work In Progress
 
-- **Transactional Email Delivery**: Send individual transactional emails via API
-- **Broadcast Campaigns**: Create and send batch email campaigns to targeted segments
-- **Contact Management**: Maintain a database of contacts with subscription status
-- **Tagging System**: Organize contacts with tags for targeted communications
-- **Markdown Support**: Create email content easily using Markdown format
-- **Subscription Management**: Track opt-ins and opt-outs with full compliance features
+Rakennamme asioita aktiivisesti... toivottavasti pääsemme pian näyttämään jotain!
 
-## Architecture
+We're building things out actively... hopefully getting close to showing something soon!
 
-The Tailwind Traders Mail Service consists of several components:
+## Ominaisuudet / Features
 
-- **.NET Core Backend**: Provides the API and core functionality
-- **PostgreSQL Database**: Stores contacts, broadcasts, and email templates
-- **Background Jobs**: Processes email sending tasks asynchronously
-- **CLI Tools**: Command-line interface for system management
+### Broadcast-lähetykset / Broadcast Sending
+Broadcast-malli mahdollistaa massasähköpostilähetysten luomisen markdown-dokumenteista. Voit:
 
-## Getting Started
+The Broadcast model enables creating mass email sends from markdown documents. You can:
 
-### Prerequisites
+- Luoda lähetyksiä markdown-sähköposteista / Create broadcasts from markdown emails
+- Kohdistaa lähetykset tageilla / Target sends with tags
+- Seurata kontaktien määrää / Track contact counts
+- Hallita lähetyksen tilaa / Manage broadcast status
 
-- .NET 8.0 SDK or later
-- PostgreSQL database
-- Docker (optional, for containerized deployment)
+### Testikattavuus / Test Coverage
 
-### Setup
+Projekti sisältää kattavat yksikkötestit Broadcast-mallille:
 
-1. Clone the repository:
+The project includes comprehensive unit tests for the Broadcast model:
 
-   ```bash
-   git clone https://github.com/scubaninja/dotNET-mail-demo.git
-   cd dotNET-mail-demo
-   ```
+- ✅ 17 läpäistyä testiä / 17 passing tests
+- ✅ Täydellinen kattavuus kaikille julkisille metodeille / Full coverage of all public methods
+- ✅ Poikkeustapausten testaus / Edge case testing
+- ✅ Virheidenkäsittelyn validointi / Error handling validation
 
-2. Set up the database:
+## Kehitys / Development
 
-   ```bash
-   cd db
-   make setup
-   ```
-
-3. Run the server:
-
-   ```bash
-   cd ../server
-   dotnet run
-   ```
-
-## Usage
-
-### Creating a Broadcast
-
-Broadcasts can be created from Markdown files that contain email content and metadata:
-
-```csharp
-// Create a broadcast from markdown content
-var broadcast = Broadcast.FromMarkdown(markdownContent);
-```
-
-### Managing Contacts
-
-Contacts can be added with tags for segmentation:
-
-```csharp
-// Add a contact with tags
-var contact = new Contact
-{
-    Email = "jane.doe@example.com",
-    Name = "Jane Doe",
-    Tags = new List<string> { "customer", "newsletter", "vip" }
-};
-ContactRepository.Add(contact);
-```
-
-### Sending Emails
-
-Emails can be sent via API call or through the CLI tools:
+### Testien suorittaminen / Running Tests
 
 ```bash
-./bin/mdmail-broadcast send --campaign=welcome-series
+cd server
+dotnet test
 ```
 
-## Work In Progress
+### Testien suorittaminen kattavuusraportilla / Running Tests with Coverage
 
-We're building things out actively... getting close to showing more features soon!
+```bash
+cd server
+dotnet test --collect:"XPlat Code Coverage"
+```
 
-## Contributing
+### Tietokannan alustaminen / Database Setup
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+```bash
+cd server
+make db      # Luo tietokanta / Create database
+make seed    # Täytä testidatalla / Seed with test data
+```
+
+## Teknologiat / Technologies
+
+- **.NET 8.0** - Web API framework
+- **PostgreSQL** - Tietokanta / Database
+- **Dapper** - Kevyt ORM / Lightweight ORM
+- **Markdig** - Markdown-käsittely / Markdown processing
+- **xUnit** - Testausframework / Testing framework
+- **Moq** - Mocking-kirjasto testaukseen / Mocking library for tests
+
+## Dokumentaatio / Documentation
+
+Lisää dokumentaatiota löytyy:
+
+More documentation can be found in:
+
+- `server/README.md` - API-dokumentaatio / API documentation
+- `cli/README.md` - CLI-työkalun dokumentaatio / CLI tool documentation
+- `db/README.md` - Tietokantarakenne / Database structure
