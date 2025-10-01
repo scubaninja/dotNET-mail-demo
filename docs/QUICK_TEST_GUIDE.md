@@ -54,7 +54,7 @@ psql tailwind_test < test/database/schema_tests.sql
 dotnet test
 
 # Run with coverage
-dotnet test /p:CollectCoverage=true
+dotnet test --collect:"XPlat Code Coverage"
 
 # Run specific test class
 dotnet test --filter "ClassName~ContactTests"
@@ -63,7 +63,7 @@ dotnet test --filter "ClassName~ContactTests"
 dotnet watch test
 
 # Generate coverage report
-dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
+dotnet test --collect:"XPlat Code Coverage" --results-directory ./coverage
 ```
 
 ### CLI (Node.js)
@@ -177,13 +177,13 @@ curl -X POST http://localhost:5000/subscribe \
   -d '{"email": "test@example.com", "name": "Test User"}'
 
 # Get confirmation key
-psql tailwind -t -c "SELECT key FROM mail.contacts WHERE email = 'test@example.com';"
+psql tailwind_test -t -c "SELECT key FROM mail.contacts WHERE email = 'test@example.com';"
 
 # Confirm subscription
 curl http://localhost:5000/confirm/{key}
 
 # Verify
-psql tailwind -c "SELECT email, subscribed FROM mail.contacts WHERE email = 'test@example.com';"
+psql tailwind_test -c "SELECT email, subscribed FROM mail.contacts WHERE email = 'test@example.com';"
 ```
 
 ### Test 3: Check System Health
@@ -193,7 +193,7 @@ psql tailwind -c "SELECT email, subscribed FROM mail.contacts WHERE email = 'tes
 curl http://localhost:5000/health
 
 # Database connectivity
-psql tailwind -c "SELECT 1;"
+psql tailwind_test -c "SELECT 1;"
 
 # Mailpit health
 curl http://localhost:8025/api/v1/info
@@ -282,11 +282,15 @@ for i in {1..10}; do dotnet test; done
 
 ```yaml
 # Run tests in CI
-- name: Run Tests
-  run: |
-    cd server && dotnet test
-    cd cli && npm test
-    cd jobs && go test ./...
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run Tests
+        run: |
+          cd server && dotnet test
+          cd cli && npm test
+          cd jobs && go test ./...
 ```
 
 ### Pre-commit Testing
@@ -311,7 +315,7 @@ chmod +x .git/hooks/pre-commit
 ab -n 1000 -c 10 http://localhost:5000/admin/contacts
 
 # Database performance test
-psql tailwind -c "\timing" -c "EXPLAIN ANALYZE SELECT * FROM mail.contacts WHERE subscribed = true;"
+psql tailwind_test -c "\timing" -c "EXPLAIN ANALYZE SELECT * FROM mail.contacts WHERE subscribed = true;"
 
 # Jobs throughput test
 cd jobs
@@ -328,7 +332,7 @@ curl -X POST http://localhost:5000/subscribe \
   -d '{"email": "test@example.com\"; DROP TABLE mail.contacts; --"}'
 
 # Verify no damage
-psql tailwind -c "\dt mail.contacts"
+psql tailwind_test -c "\dt mail.contacts"
 
 # XSS test in broadcast
 # (Include script tags in markdown, verify they're escaped)
