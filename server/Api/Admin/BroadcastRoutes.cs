@@ -74,11 +74,11 @@ public class BroadcastRoutes{
 
       //return response;
     }).WithOpenApi(op => {
-      op.Summary = "Queue a broadcast for your contacts";
-      op.Description = "This pops the messages for your broadcast into the queue and double checks the validation";
-      op.RequestBody.Description = "The markdown for the email";
+      op.Summary = "🤖 AI Chat Assistant";
+      op.Description = "Get AI-powered assistance for creating email content. Send a prompt and receive intelligent suggestions for your email campaigns.";
+      op.RequestBody.Description = "Your prompt or question for the AI assistant";
       return op;
-    });
+    }).WithTags("Admin - AI Assistant");
     //validate a broadcast
     app.MapPost("/admin/queue-broadcast", ([FromBody] ValidationRequest req,  [FromServices] IDb db) => {
       var mardown = req.Markdown;
@@ -101,11 +101,11 @@ public class BroadcastRoutes{
 
       return response;
     }).WithOpenApi(op => {
-      op.Summary = "Queue a broadcast for your contacts";
-      op.Description = "This pops the messages for your broadcast into the queue and double checks the validation";
-      op.RequestBody.Description = "The markdown for the email";
+      op.Summary = "📤 Queue Email Broadcast";
+      op.Description = "Creates and queues a new broadcast email campaign from markdown content. Messages will be sent to all opted-in contacts. The markdown must include Subject, Summary, and Body sections.";
+      op.RequestBody.Description = "The markdown content for the email broadcast";
       return op;
-    });
+    }).WithTags("Admin - Broadcasts");
 
     app.MapPost("/admin/validate", ([FromBody] ValidationRequest req,  [FromServices] IDb db) => {
       if(req.Markdown == null){
@@ -135,15 +135,16 @@ public class BroadcastRoutes{
       return response;
     })
     .WithOpenApi(op => {
-      op.Summary = "Validate the markdown for an email";
-      op.Description = "Before you send a broadcast, ping this endpoint to ensure that the markdown is valid";
-      op.RequestBody.Description = "The markdown for the email";
+      op.Summary = "✅ Validate Email Markdown";
+      op.Description = "Validates markdown content for a broadcast email before sending. Returns validation status and estimated contact count. Use this to catch errors before queuing your broadcast.";
+      op.RequestBody.Description = "The markdown content to validate";
       return op;
     })
     .Produces<ValidationResponse>(StatusCodes.Status200OK)
     .Produces(StatusCodes.Status400BadRequest)
     .Produces(StatusCodes.Status403Forbidden)
-    .Produces(StatusCodes.Status500InternalServerError);
+    .Produces(StatusCodes.Status500InternalServerError)
+    .WithTags("Admin - Broadcasts");
   }
 
 }
