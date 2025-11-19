@@ -17,9 +17,27 @@ builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo
     {
-        Version = "0.0.1",
-        Title = "Tailwind Traders Mail Services API",
-        Description = "Transactional and bulk email sending services for Tailwind Traders.",
+        Version = "v1.0.2",
+        Title = "📧 Tailwind Traders Mail Services API",
+        Description = @"
+## Welcome to Tailwind Traders Mail Services! 🚀
+
+A powerful, modern email service platform for transactional and bulk email sending.
+
+### Features
+- **Transactional Emails**: Send individual emails triggered by user actions
+- **Bulk Campaigns**: Send email broadcasts to your entire contact list or segments
+- **Contact Management**: Manage subscribers with easy opt-in/opt-out functionality
+- **Click Tracking**: Monitor engagement with link click tracking
+- **Tag-based Organization**: Organize contacts with flexible tagging
+
+### Getting Started
+1. Use the `/signup` endpoint to add new contacts
+2. Create broadcasts with the admin endpoints
+3. Track engagement with click tracking
+4. Manage your list with bulk operations
+
+For more information, visit our [GitHub repository](https://github.com/scubaninja/dotNET-mail-demo).",
         Contact = new OpenApiContact
         {
             Name = "Rob Conery, Aaron Wislang, and the Tailwind Traders Team",
@@ -27,7 +45,7 @@ builder.Services.AddSwaggerGen(options =>
         },
         License = new OpenApiLicense
         {
-            Name = "MIT",
+            Name = "MIT License",
             Url = new Uri("https://opensource.org/license/mit/")
         }
     });
@@ -36,11 +54,20 @@ builder.Services.AddSwaggerGen(options =>
 
 var app = builder.Build();
 
+app.UseStaticFiles();
 app.UseSwagger();
 app.UseSwaggerUI(options =>
 {
     options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
     options.RoutePrefix = string.Empty;
+    options.DocumentTitle = "Tailwind Traders Mail API";
+    options.InjectStylesheet("/css/swagger-custom.css");
+    options.DefaultModelsExpandDepth(2);
+    options.DefaultModelExpandDepth(2);
+    options.DisplayRequestDuration();
+    options.EnableDeepLinking();
+    options.EnableFilter();
+    options.ShowExtensions();
 });
 var conn = DB.Postgres();
 Tailwind.Mail.Api.PublicRoutes.MapRoutes(app);
