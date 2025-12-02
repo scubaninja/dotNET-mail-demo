@@ -1,7 +1,11 @@
-# Tailwind Mail Dokumentation
+# Tailwind Mail Documentation
 
-Willkommen zur Dokumentation von Tailwind Mail.
+Welcome to the Tailwind Mail documentation.
 
-## Verfügbare Dokumentation
+## Available Documentation
 
-- [Barrierefreiheit / Accessibility](BARRIEREFREIHEIT.md) - Dokumentation zur Barrierefreiheit in deutscher Sprache
+### English
+- [Accessibility](ACCESSIBILITY.md) - Accessibility features documentation in English
+
+### German (Deutsch)
+- [Barrierefreiheit](BARRIEREFREIHEIT.md) - Accessibility documentation in German (Dokumentation zur Barrierefreiheit in deutscher Sprache)
