@@ -1,3 +1,5 @@
+using System.Net;
+
 namespace Tailwind.Mail.Services;
 
 /// <summary>
@@ -10,9 +12,12 @@ public static class AccessibleEmailTemplate
     /// Wraps email content in an accessible HTML template with proper structure,
     /// ARIA attributes, and live regions for dynamic content.
     /// </summary>
-    /// <param name="subject">The email subject for the title tag</param>
-    /// <param name="preview">Preview text for email clients</param>
-    /// <param name="bodyHtml">The main HTML content of the email</param>
+    /// <param name="subject">The email subject for the title tag (will be HTML-encoded)</param>
+    /// <param name="preview">Preview text for email clients (will be HTML-encoded)</param>
+    /// <param name="bodyHtml">The main HTML content of the email. This is expected to be 
+    /// trusted HTML content (e.g., from markdown conversion). It is NOT escaped to preserve 
+    /// formatting. Ensure content is sanitized before passing to this method if it comes 
+    /// from untrusted sources.</param>
     /// <param name="lang">Language code for the email (default: "en")</param>
     /// <returns>Complete accessible HTML email</returns>
     public static string Wrap(string subject, string preview, string bodyHtml, string lang = "en")
@@ -220,19 +225,14 @@ public static class AccessibleEmailTemplate
     }
 
     /// <summary>
-    /// Escapes HTML special characters to prevent XSS
+    /// Escapes HTML special characters to prevent XSS using the .NET built-in encoder
     /// </summary>
     private static string EscapeHtml(string input)
     {
         if (string.IsNullOrEmpty(input))
             return string.Empty;
             
-        return input
-            .Replace("&", "&amp;")
-            .Replace("<", "&lt;")
-            .Replace(">", "&gt;")
-            .Replace("\"", "&quot;")
-            .Replace("'", "&#x27;");
+        return WebUtility.HtmlEncode(input);
     }
     
     /// <summary>
