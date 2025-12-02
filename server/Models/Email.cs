@@ -23,6 +23,7 @@ public class Email{
     Slug = doc.Data.Slug;
     Subject = doc.Data.Subject;
     Preview = doc.Data.Summary;
-    Html = doc.Html;
+    // Use accessible HTML template with screen reader support and ARIA attributes
+    Html = doc.AccessibleHtml ?? doc.Html;
   }
 }

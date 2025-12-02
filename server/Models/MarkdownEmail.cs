@@ -3,14 +3,25 @@ using Markdig;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;
+using Tailwind.Mail.Services;
 
 namespace Tailwind.Mail.Models;
 
 public class MarkdownEmail{
   public string? Markdown { get; set; }
   public string? Html { get; set; }
+  /// <summary>
+  /// Gets the fully accessible HTML email with proper structure, ARIA attributes,
+  /// and live regions for screen reader support.
+  /// </summary>
+  public string? AccessibleHtml { get; set; }
   public dynamic? Data { get; set; }
   public List<string> Tags { get; set; } = new List<string>();
+  /// <summary>
+  /// When true, uses the accessible HTML wrapper template.
+  /// Set to false to use raw HTML without accessibility enhancements.
+  /// </summary>
+  public bool UseAccessibleTemplate { get; set; } = true;
   public MarkdownEmail()
   {
 
@@ -56,6 +67,17 @@ public class MarkdownEmail{
     }
     if(!expando.ContainsKey("SendToTag")){
       Data.SendToTag = "*"; //send to everyone
+    }
+    
+    // Generate accessible HTML with screen reader support and live regions
+    if(UseAccessibleTemplate && Html != null && Data != null){
+      var subject = Data.Subject?.ToString() ?? "";
+      var summary = Data.Summary?.ToString() ?? "";
+      // Get language from frontmatter or default to "en"
+      var lang = expando.ContainsKey("Lang") ? Data.Lang?.ToString() ?? "en" : "en";
+      AccessibleHtml = AccessibleEmailTemplate.Wrap(subject, summary, Html, lang);
+    } else {
+      AccessibleHtml = Html;
     }
   }
 }
