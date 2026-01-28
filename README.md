@@ -8,4 +8,18 @@ We're building things out actively... hopefully getting close to showing somethi
 
 ## Deployment
 
-This project includes automated containerized deployment to Azure and AWS that runs in parallel. See the [Deployment Guide](docs/DEPLOYMENT.md) for detailed instructions on setting up and using the automated deployment workflow.
+This project includes automated containerized deployment to Azure and AWS that runs in parallel.
+
+### Quick Links
+
+- 🚀 [Quick Start Guide](docs/QUICKSTART.md) - Get deploying in minutes
+- 📖 [Complete Deployment Guide](docs/DEPLOYMENT.md) - Detailed setup and configuration
+- 🔒 [Security Summary](docs/SECURITY-SUMMARY.md) - Security measures and compliance
+
+### Features
+
+- **Parallel Deployment**: Simultaneously deploys to Azure Container Apps and AWS ECS
+- **Containerized**: Fully containerized .NET server and Go jobs applications
+- **Secure**: OIDC authentication, non-root containers, minimal permissions
+- **Tested**: Comprehensive validation and security scanning
+- **Documented**: Step-by-step guides and troubleshooting
