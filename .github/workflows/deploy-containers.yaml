@@ -45,10 +45,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.SERVER_IMAGE_NAME }}
           tags: |
             type=ref,event=branch
-            type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=sha,prefix={{branch}}-
+            type=sha
 
       - name: Build and push server image
         uses: docker/build-push-action@v5
@@ -66,10 +63,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.JOBS_IMAGE_NAME }}
           tags: |
             type=ref,event=branch
-            type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=sha,prefix={{branch}}-
+            type=sha
 
       - name: Build and push jobs image
         uses: docker/build-push-action@v5
@@ -98,7 +92,7 @@ jobs:
       - name: Deploy to Azure Container Apps - Server
         uses: azure/CLI@v1
         with:
-          azcliversion: latest
+          azcliversion: 2.53.0
           inlineScript: |
             # Check if container app exists
             if az containerapp show --name mail-server --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} &> /dev/null; then
@@ -128,7 +122,7 @@ jobs:
       - name: Deploy to Azure Container Apps - Jobs
         uses: azure/CLI@v1
         with:
-          azcliversion: latest
+          azcliversion: 2.53.0
           inlineScript: |
             # Check if container app exists
             if az containerapp show --name mail-jobs --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} &> /dev/null; then
@@ -174,11 +168,16 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Login to Amazon ECR Public
-        id: login-ecr-public
-        uses: aws-actions/amazon-ecr-login@v2
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
         with:
-          registry-type: public
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
 
       - name: Pull and push server image to ECR
         run: |
@@ -232,12 +231,28 @@ jobs:
   deployment-summary:
     needs: [deploy-to-azure, deploy-to-aws]
     runs-on: ubuntu-latest
+    if: always()  # Run even if one deployment fails
     steps:
       - name: Deployment complete
         run: |
-          echo "🎉 Deployment to both Azure and AWS completed successfully!"
+          echo "🎉 Deployment process completed!"
           echo ""
-          echo "✅ Azure Container Apps deployed"
-          echo "✅ AWS ECS services deployed"
+          if [ "${{ needs.deploy-to-azure.result }}" == "success" ]; then
+            echo "✅ Azure Container Apps deployed successfully"
+          else
+            echo "❌ Azure deployment failed or was skipped"
+          fi
+          
+          if [ "${{ needs.deploy-to-aws.result }}" == "success" ]; then
+            echo "✅ AWS ECS services deployed successfully"
+          else
+            echo "❌ AWS deployment failed or was skipped"
+          fi
           echo ""
-          echo "All services are now running the latest container images."
+          
+          if [ "${{ needs.deploy-to-azure.result }}" == "success" ] && [ "${{ needs.deploy-to-aws.result }}" == "success" ]; then
+            echo "All services are now running the latest container images."
+          else
+            echo "Some deployments failed. Check the logs above for details."
+            exit 1
+          fi

@@ -84,16 +84,16 @@ jobs:
           
           if 'build-and-push-images' not in azure_needs:
               print("❌ Error: deploy-to-azure must depend on build-and-push-images")
-              exit(1)
+              sys.exit(1)
           
           if 'build-and-push-images' not in aws_needs:
               print("❌ Error: deploy-to-aws must depend on build-and-push-images")
-              exit(1)
+              sys.exit(1)
           
           # Verify they don't depend on each other (ensuring parallelism)
           if 'deploy-to-aws' in azure_needs or 'deploy-to-azure' in aws_needs:
               print("❌ Error: Azure and AWS deployments should run in parallel, not sequentially")
-              exit(1)
+              sys.exit(1)
           
           print("✅ Parallel deployment structure is correctly configured")
           print("✅ Azure and AWS deployments will run in parallel")
@@ -104,7 +104,7 @@ jobs:
           echo "Checking for required secrets in workflow..."
           
           # Extract secrets used in the workflow
-          grep -o '\${{ secrets\.[A-Z_]* }}' .github/workflows/deploy-containers.yaml | \
+          grep -o '\${{ secrets\.[A-Z0-9_]* }}' .github/workflows/deploy-containers.yaml | \
             sort -u | \
             sed 's/\${{ secrets\.\(.*\) }}/\1/' > /tmp/required_secrets.txt
           
@@ -180,7 +180,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run Trivy vulnerability scanner on server Dockerfile
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@0.16.1
         with:
           scan-type: 'config'
           scan-ref: 'server/Dockerfile'
@@ -188,7 +188,7 @@ jobs:
           exit-code: '0'  # Don't fail on vulnerabilities, just report
 
       - name: Run Trivy vulnerability scanner on jobs Dockerfile
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@0.16.1
         with:
           scan-type: 'config'
           scan-ref: 'jobs/Dockerfile'

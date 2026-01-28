@@ -54,13 +54,43 @@ The deployment workflow (`deploy-containers.yaml`) automates the following:
    aws ecs create-cluster --cluster-name mail-cluster
    ```
 
-2. **AWS ECR Repository**: Create repositories for your images
+2. **AWS ECR Repository**: Create private ECR repositories for your images
    ```bash
    aws ecr create-repository --repository-name mail-server
    aws ecr create-repository --repository-name mail-jobs
    ```
 
-3. **AWS IAM Role**: Set up OIDC federation for GitHub Actions
+3. **AWS ECS Task Definitions and Services**: Create task definitions and services
+   
+   **Note**: Before the workflow can deploy, you must create ECS task definitions that reference your ECR images with the `:latest` tag. The workflow uses `update-service` with `--force-new-deployment` which requires existing services and task definitions.
+   
+   Example task definition for mail-server:
+   ```json
+   {
+     "family": "mail-server",
+     "containerDefinitions": [{
+       "name": "mail-server",
+       "image": "<AWS_ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/mail-server:latest",
+       "portMappings": [{"containerPort": 8080}],
+       "environment": [
+         {"name": "DATABASE_URL", "value": "your-connection-string"}
+       ]
+     }],
+     "cpu": "512",
+     "memory": "1024"
+   }
+   ```
+   
+   Create the service:
+   ```bash
+   aws ecs create-service \
+     --cluster mail-cluster \
+     --service-name mail-server \
+     --task-definition mail-server \
+     --desired-count 1
+   ```
+
+4. **AWS IAM Role**: Set up OIDC federation for GitHub Actions
    - Follow: https://docs.github.com/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services
 
 ## Required GitHub Secrets
@@ -133,8 +163,9 @@ Trigger manually via GitHub UI:
 - Forces new deployment
 
 ### 4. deployment-summary
-- Runs after both parallel deployments complete
-- Provides consolidated status
+- Runs after both parallel deployments complete (even if one fails)
+- Provides consolidated status for both deployments
+- Exits with error if any deployment failed
 
 ## Testing
 
@@ -187,8 +218,10 @@ aws logs tail /ecs/mail-server --follow
    - Verify network connectivity and security groups
 
 4. **Parallel Deployment Issues**
-   - Both deployments are independent and one can succeed while the other fails
+   - Both deployments are independent; one can succeed while the other fails
+   - The deployment-summary job will indicate which deployments succeeded or failed
    - Check individual job logs for specific errors
+   - The workflow will exit with an error if any deployment fails
 
 ### Debugging
 
@@ -202,7 +235,7 @@ Enable debug logging by setting repository secrets:
 ```bash
 # Rollback to previous revision
 az containerapp revision list --name mail-server --resource-group your-resource-group
-az containerapp revision activate --revision <revision-name> --resource-group your-resource-group
+az containerapp revision activate --name mail-server --revision <revision-name> --resource-group your-resource-group
 ```
 
 ### AWS
