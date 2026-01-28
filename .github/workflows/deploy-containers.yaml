@@ -1,0 +1,258 @@
+name: Build and Deploy Containers to Azure and AWS
+
+on:
+  push:
+    branches: ['main', 'latest']
+    paths:
+      - 'server/**'
+      - 'jobs/**'
+      - '.github/workflows/deploy-containers.yaml'
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  SERVER_IMAGE_NAME: ${{ github.repository }}-server
+  JOBS_IMAGE_NAME: ${{ github.repository }}-jobs
+
+permissions:
+  id-token: write
+  contents: read
+  packages: write
+
+jobs:
+  # Build and push container images
+  build-and-push-images:
+    runs-on: ubuntu-latest
+    outputs:
+      server-image: ${{ steps.server-meta.outputs.tags }}
+      jobs-image: ${{ steps.jobs-meta.outputs.tags }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Build and push server image
+      - name: Extract metadata for server image
+        id: server-meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.SERVER_IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=sha
+
+      - name: Build and push server image
+        uses: docker/build-push-action@v5
+        with:
+          context: server
+          push: true
+          tags: ${{ steps.server-meta.outputs.tags }}
+          labels: ${{ steps.server-meta.outputs.labels }}
+
+      # Build and push jobs image
+      - name: Extract metadata for jobs image
+        id: jobs-meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.JOBS_IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=sha
+
+      - name: Build and push jobs image
+        uses: docker/build-push-action@v5
+        with:
+          context: jobs
+          push: true
+          tags: ${{ steps.jobs-meta.outputs.tags }}
+          labels: ${{ steps.jobs-meta.outputs.labels }}
+
+  # Deploy to Azure (runs in parallel with AWS deployment)
+  deploy-to-azure:
+    needs: build-and-push-images
+    runs-on: ubuntu-latest
+    environment: azure-production
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy to Azure Container Apps - Server
+        uses: azure/CLI@v1
+        with:
+          azcliversion: 2.53.0
+          inlineScript: |
+            # Check if container app exists
+            if az containerapp show --name mail-server --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} &> /dev/null; then
+              echo "Updating existing container app: mail-server"
+              az containerapp update \
+                --name mail-server \
+                --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+                --image ${{ needs.build-and-push-images.outputs.server-image }} \
+                --set-env-vars DATABASE_URL="${{ secrets.AZURE_DATABASE_URL }}"
+            else
+              echo "Creating new container app: mail-server"
+              az containerapp create \
+                --name mail-server \
+                --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+                --environment ${{ secrets.AZURE_CONTAINER_ENV }} \
+                --image ${{ needs.build-and-push-images.outputs.server-image }} \
+                --target-port 8080 \
+                --ingress external \
+                --registry-server ${{ env.REGISTRY }} \
+                --registry-username ${{ github.actor }} \
+                --registry-password ${{ secrets.GITHUB_TOKEN }} \
+                --env-vars DATABASE_URL="${{ secrets.AZURE_DATABASE_URL }}" \
+                --cpu 0.5 \
+                --memory 1.0Gi
+            fi
+
+      - name: Deploy to Azure Container Apps - Jobs
+        uses: azure/CLI@v1
+        with:
+          azcliversion: 2.53.0
+          inlineScript: |
+            # Check if container app exists
+            if az containerapp show --name mail-jobs --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} &> /dev/null; then
+              echo "Updating existing container app: mail-jobs"
+              az containerapp update \
+                --name mail-jobs \
+                --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+                --image ${{ needs.build-and-push-images.outputs.jobs-image }} \
+                --set-env-vars AZURE_SERVICEBUS_CONNECTION_STRING="${{ secrets.AZURE_SERVICEBUS_CONNECTION_STRING }}"
+            else
+              echo "Creating new container app: mail-jobs"
+              az containerapp create \
+                --name mail-jobs \
+                --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+                --environment ${{ secrets.AZURE_CONTAINER_ENV }} \
+                --image ${{ needs.build-and-push-images.outputs.jobs-image }} \
+                --registry-server ${{ env.REGISTRY }} \
+                --registry-username ${{ github.actor }} \
+                --registry-password ${{ secrets.GITHUB_TOKEN }} \
+                --env-vars AZURE_SERVICEBUS_CONNECTION_STRING="${{ secrets.AZURE_SERVICEBUS_CONNECTION_STRING }}" \
+                --cpu 0.5 \
+                --memory 1.0Gi
+            fi
+
+      - name: Azure deployment summary
+        run: |
+          echo "✅ Azure deployment completed successfully"
+          echo "Server image: ${{ needs.build-and-push-images.outputs.server-image }}"
+          echo "Jobs image: ${{ needs.build-and-push-images.outputs.jobs-image }}"
+
+  # Deploy to AWS (runs in parallel with Azure deployment)
+  deploy-to-aws:
+    needs: build-and-push-images
+    runs-on: ubuntu-latest
+    environment: aws-production
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Pull and push server image to ECR
+        run: |
+          # Pull from GitHub Container Registry
+          docker pull ${{ needs.build-and-push-images.outputs.server-image }}
+          
+          # Tag for ECR
+          docker tag ${{ needs.build-and-push-images.outputs.server-image }} \
+            ${{ secrets.AWS_ECR_REGISTRY }}/mail-server:latest
+          
+          # Push to ECR
+          docker push ${{ secrets.AWS_ECR_REGISTRY }}/mail-server:latest
+
+      - name: Pull and push jobs image to ECR
+        run: |
+          # Pull from GitHub Container Registry
+          docker pull ${{ needs.build-and-push-images.outputs.jobs-image }}
+          
+          # Tag for ECR
+          docker tag ${{ needs.build-and-push-images.outputs.jobs-image }} \
+            ${{ secrets.AWS_ECR_REGISTRY }}/mail-jobs:latest
+          
+          # Push to ECR
+          docker push ${{ secrets.AWS_ECR_REGISTRY }}/mail-jobs:latest
+
+      - name: Deploy to AWS ECS - Server
+        run: |
+          # Update ECS service with new image
+          aws ecs update-service \
+            --cluster ${{ secrets.AWS_ECS_CLUSTER }} \
+            --service mail-server \
+            --force-new-deployment \
+            --region ${{ secrets.AWS_REGION }}
+
+      - name: Deploy to AWS ECS - Jobs
+        run: |
+          # Update ECS service with new image
+          aws ecs update-service \
+            --cluster ${{ secrets.AWS_ECS_CLUSTER }} \
+            --service mail-jobs \
+            --force-new-deployment \
+            --region ${{ secrets.AWS_REGION }}
+
+      - name: AWS deployment summary
+        run: |
+          echo "✅ AWS deployment completed successfully"
+          echo "Server image: ${{ secrets.AWS_ECR_REGISTRY }}/mail-server:latest"
+          echo "Jobs image: ${{ secrets.AWS_ECR_REGISTRY }}/mail-jobs:latest"
+
+  # Final summary job that runs after both parallel deployments
+  deployment-summary:
+    needs: [deploy-to-azure, deploy-to-aws]
+    runs-on: ubuntu-latest
+    if: always()  # Run even if one deployment fails
+    steps:
+      - name: Deployment complete
+        run: |
+          echo "🎉 Deployment process completed!"
+          echo ""
+          if [ "${{ needs.deploy-to-azure.result }}" == "success" ]; then
+            echo "✅ Azure Container Apps deployed successfully"
+          else
+            echo "❌ Azure deployment failed or was skipped"
+          fi
+          
+          if [ "${{ needs.deploy-to-aws.result }}" == "success" ]; then
+            echo "✅ AWS ECS services deployed successfully"
+          else
+            echo "❌ AWS deployment failed or was skipped"
+          fi
+          echo ""
+          
+          if [ "${{ needs.deploy-to-azure.result }}" == "success" ] && [ "${{ needs.deploy-to-aws.result }}" == "success" ]; then
+            echo "All services are now running the latest container images."
+          else
+            echo "Some deployments failed. Check the logs above for details."
+            exit 1
+          fi

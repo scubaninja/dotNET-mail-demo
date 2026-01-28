@@ -1,0 +1,43 @@
+# Build artifacts
+bin/
+obj/
+out/
+dist/
+*.dll
+*.exe
+*.pdb
+
+# Test results
+TestResults/
+test-results/
+coverage/
+
+# Temporary files
+*.tmp
+*.log
+*.swp
+*.swo
+*~
+.DS_Store
+
+# IDE files
+.vscode/
+.idea/
+*.suo
+*.user
+.vs/
+
+# Environment files
+.env
+.env.local
+*.local
+
+# Docker
+docker-compose.override.yml
+
+# Dependencies
+node_modules/
+vendor/
+
+# OS files
+Thumbs.db
