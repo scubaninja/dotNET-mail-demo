@@ -1,0 +1,211 @@
+name: Test Deployment Workflow
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/deploy-containers.yaml'
+      - 'server/Dockerfile'
+      - 'jobs/Dockerfile'
+  workflow_dispatch:
+
+jobs:
+  validate-workflow:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate workflow YAML syntax
+        run: |
+          echo "Validating workflow YAML files..."
+          
+          # Check if the workflow file exists
+          if [ ! -f .github/workflows/deploy-containers.yaml ]; then
+            echo "❌ Error: deploy-containers.yaml not found"
+            exit 1
+          fi
+          
+          echo "✅ Workflow file exists"
+          
+          # Basic YAML syntax validation using Python
+          python3 << 'EOF'
+          import yaml
+          import sys
+          
+          try:
+              with open('.github/workflows/deploy-containers.yaml', 'r') as f:
+                  workflow = yaml.safe_load(f)
+              
+              # Validate required top-level keys
+              required_keys = ['name', 'on', 'jobs']
+              for key in required_keys:
+                  if key not in workflow:
+                      print(f"❌ Error: Missing required key '{key}' in workflow")
+                      sys.exit(1)
+              
+              # Validate jobs structure
+              if not isinstance(workflow['jobs'], dict):
+                  print("❌ Error: 'jobs' must be a dictionary")
+                  sys.exit(1)
+              
+              # Check for required jobs
+              required_jobs = ['build-and-push-images', 'deploy-to-azure', 'deploy-to-aws']
+              for job in required_jobs:
+                  if job not in workflow['jobs']:
+                      print(f"❌ Error: Missing required job '{job}'")
+                      sys.exit(1)
+              
+              print("✅ Workflow YAML syntax is valid")
+              print(f"✅ Found {len(workflow['jobs'])} jobs defined")
+              
+          except yaml.YAMLError as e:
+              print(f"❌ YAML syntax error: {e}")
+              sys.exit(1)
+          except Exception as e:
+              print(f"❌ Error: {e}")
+              sys.exit(1)
+          EOF
+
+      - name: Validate parallel deployment structure
+        run: |
+          echo "Validating parallel deployment configuration..."
+          
+          python3 << 'EOF'
+          import yaml
+          
+          with open('.github/workflows/deploy-containers.yaml', 'r') as f:
+              workflow = yaml.safe_load(f)
+          
+          jobs = workflow['jobs']
+          
+          # Check that Azure and AWS jobs both depend on build job
+          azure_needs = jobs.get('deploy-to-azure', {}).get('needs', [])
+          aws_needs = jobs.get('deploy-to-aws', {}).get('needs', [])
+          
+          if 'build-and-push-images' not in azure_needs:
+              print("❌ Error: deploy-to-azure must depend on build-and-push-images")
+              exit(1)
+          
+          if 'build-and-push-images' not in aws_needs:
+              print("❌ Error: deploy-to-aws must depend on build-and-push-images")
+              exit(1)
+          
+          # Verify they don't depend on each other (ensuring parallelism)
+          if 'deploy-to-aws' in azure_needs or 'deploy-to-azure' in aws_needs:
+              print("❌ Error: Azure and AWS deployments should run in parallel, not sequentially")
+              exit(1)
+          
+          print("✅ Parallel deployment structure is correctly configured")
+          print("✅ Azure and AWS deployments will run in parallel")
+          EOF
+
+      - name: Check required secrets documentation
+        run: |
+          echo "Checking for required secrets in workflow..."
+          
+          # Extract secrets used in the workflow
+          grep -o '\${{ secrets\.[A-Z_]* }}' .github/workflows/deploy-containers.yaml | \
+            sort -u | \
+            sed 's/\${{ secrets\.\(.*\) }}/\1/' > /tmp/required_secrets.txt
+          
+          echo "📋 Required secrets for this workflow:"
+          cat /tmp/required_secrets.txt
+          
+          # Count secrets
+          secret_count=$(wc -l < /tmp/required_secrets.txt)
+          echo ""
+          echo "✅ Found $secret_count required secrets"
+
+  validate-dockerfiles:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate server Dockerfile
+        run: |
+          echo "Validating server Dockerfile..."
+          
+          if [ ! -f server/Dockerfile ]; then
+            echo "❌ Error: server/Dockerfile not found"
+            exit 1
+          fi
+          
+          # Check for required Dockerfile instructions
+          if ! grep -q "FROM" server/Dockerfile; then
+            echo "❌ Error: server/Dockerfile missing FROM instruction"
+            exit 1
+          fi
+          
+          if ! grep -q "COPY" server/Dockerfile; then
+            echo "❌ Error: server/Dockerfile missing COPY instruction"
+            exit 1
+          fi
+          
+          echo "✅ Server Dockerfile is valid"
+
+      - name: Validate jobs Dockerfile
+        run: |
+          echo "Validating jobs Dockerfile..."
+          
+          if [ ! -f jobs/Dockerfile ]; then
+            echo "❌ Error: jobs/Dockerfile not found"
+            exit 1
+          fi
+          
+          # Check for required Dockerfile instructions
+          if ! grep -q "FROM" jobs/Dockerfile; then
+            echo "❌ Error: jobs/Dockerfile missing FROM instruction"
+            exit 1
+          fi
+          
+          echo "✅ Jobs Dockerfile is valid"
+
+      - name: Build server Docker image (test)
+        run: |
+          echo "Building server Docker image to verify it builds successfully..."
+          docker build -t test-server:latest server/
+          echo "✅ Server image built successfully"
+
+      - name: Build jobs Docker image (test)
+        run: |
+          echo "Building jobs Docker image to verify it builds successfully..."
+          docker build -t test-jobs:latest jobs/
+          echo "✅ Jobs image built successfully"
+
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner on server Dockerfile
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'config'
+          scan-ref: 'server/Dockerfile'
+          format: 'table'
+          exit-code: '0'  # Don't fail on vulnerabilities, just report
+
+      - name: Run Trivy vulnerability scanner on jobs Dockerfile
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'config'
+          scan-ref: 'jobs/Dockerfile'
+          format: 'table'
+          exit-code: '0'  # Don't fail on vulnerabilities, just report
+
+  test-summary:
+    needs: [validate-workflow, validate-dockerfiles, security-scan]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Summary
+        run: |
+          echo "🎉 All validation tests passed!"
+          echo ""
+          echo "✅ Workflow YAML syntax validated"
+          echo "✅ Parallel deployment structure verified"
+          echo "✅ Dockerfiles validated and built successfully"
+          echo "✅ Security scans completed"
+          echo ""
+          echo "The deployment workflow is ready to use!"
