@@ -11,6 +11,8 @@ on:
 jobs:
   validate-workflow:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -118,6 +120,8 @@ jobs:
 
   validate-dockerfiles:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -175,6 +179,8 @@ jobs:
 
   security-scan:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -198,6 +204,7 @@ jobs:
   test-summary:
     needs: [validate-workflow, validate-dockerfiles, security-scan]
     runs-on: ubuntu-latest
+    permissions: {}  # No permissions needed
     steps:
       - name: Summary
         run: |
