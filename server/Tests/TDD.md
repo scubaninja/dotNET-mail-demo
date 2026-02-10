@@ -42,24 +42,24 @@ Tests are organized by component type:
   - `BroadcastTests.cs` - Broadcast creation and validation
   - `MessageTests.cs` - Message lifecycle and validation
 
-- **Command Tests**: Test command execution and business logic (to be added)
-  - Contact signup, opt-in, opt-out commands
-  - Broadcast creation commands
-  - Bulk operations
+- **Command Tests**: Test command execution and business logic
+  - `ContactCommandTests.cs` - Contact signup, opt-in, opt-out commands
+  - `BulkTagCommandTests.cs` - Bulk tagging operations
+  - `LinkClickedCommandTests.cs` - Link tracking
 
 - **Integration Tests**: Test API endpoints and database interactions (to be added)
 
 ## Test Coverage
 
 Current test statistics:
-- **Total Tests**: 52
-- **Passing**: 52
+- **Total Tests**: 66
+- **Passing**: 66
 - **Failing**: 0
 
 ### Coverage by Component:
-- Models: ✅ Comprehensive
-- Commands: 🔄 In Progress
-- API Endpoints: 🔄 In Progress
+- Models: ✅ Comprehensive (52 tests)
+- Commands: ✅ Basic structure tests (14 tests)
+- API Endpoints: 📋 Planned
 - Services: 📋 Planned
 
 ## Writing Good Tests

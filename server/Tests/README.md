@@ -17,7 +17,7 @@ dotnet test --list-tests
 
 ## Test Files
 
-### Model Tests
+### Model Tests (52 tests)
 - **ActivityTests.cs** - Tests for Activity model (5 tests)
 - **BroadcastTests.cs** - Tests for Broadcast model and factory methods (10 tests)
 - **CommandResultTests.cs** - Tests for CommandResult type (5 tests)
@@ -27,7 +27,15 @@ dotnet test --list-tests
 - **MessageTests.cs** - Tests for Message model and lifecycle (12 tests)
 - **TagTests.cs** - Tests for Tag and Tagged models (7 tests)
 
-### Total: 52 tests, all passing ✅
+### Command Tests (14 tests)
+- **BulkTagCommandTests.cs** - Tests for BulkTagCommand (5 tests)
+- **ContactCommandTests.cs** - Tests for Contact-related commands (6 tests)
+  - ContactSignupCommand (2 tests)
+  - ContactOptOutCommand (2 tests)
+  - ContactOptinCommand (2 tests)
+- **LinkClickedCommandTests.cs** - Tests for LinkClickedCommand (3 tests)
+
+### Total: 66 tests, all passing ✅
 
 ## Test Philosophy
 
@@ -61,9 +69,9 @@ public void Method_Scenario_ExpectedResult()
 ## Future Tests
 
 Planned test additions:
-- Command tests (with mock database)
-- API integration tests
-- Service tests
+- API integration tests (for PublicRoutes and Admin routes)
+- Service tests (AI, BackgroundSend, Outbox)
+- Database integration tests (with test database)
 - End-to-end workflow tests
 
 ## Contributing
