@@ -59,7 +59,7 @@ public class TagTests
     }
 
     [Fact]
-    public void Tag_Slug_WithSpecialCharacters_RemovesOrReplacesCorrectly()
+    public void Tag_Slug_WithSpecialCharacters_PreservesSpecialChars()
     {
         // Arrange
         var name = "Test & Special!";
@@ -68,7 +68,8 @@ public class TagTests
         var tag = new Tag(name);
 
         // Assert
-        // The implementation converts spaces to hyphens and lowercases
+        // Note: Current implementation only replaces spaces and lowercases,
+        // special characters are preserved
         Assert.Equal("test-&-special!", tag.Slug);
     }
 
