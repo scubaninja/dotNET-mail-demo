@@ -17,15 +17,15 @@ dotnet test --list-tests
 
 ## Test Files
 
-### Model Tests (52 tests)
+### Model Tests (56 tests)
 - **ActivityTests.cs** - Tests for Activity model (5 tests)
 - **BroadcastTests.cs** - Tests for Broadcast model and factory methods (10 tests)
 - **CommandResultTests.cs** - Tests for CommandResult type (5 tests)
-- **ContactTests.cs** - Tests for Contact model (4 tests)
+- **ContactTests.cs** - Tests for Contact model (5 tests)
 - **EmailTests.cs** - Tests for Email model (5 tests)
 - **MarkdownEmailTests.cs** - Tests for MarkdownEmail parsing (8 tests)
-- **MessageTests.cs** - Tests for Message model and lifecycle (12 tests)
-- **TagTests.cs** - Tests for Tag and Tagged models (7 tests)
+- **MessageTests.cs** - Tests for Message model and lifecycle (13 tests)
+- **TagTests.cs** - Tests for Tag and Tagged models (9 tests)
 
 ### Command Tests (14 tests)
 - **BulkTagCommandTests.cs** - Tests for BulkTagCommand (5 tests)
@@ -35,7 +35,7 @@ dotnet test --list-tests
   - ContactOptinCommand (2 tests)
 - **LinkClickedCommandTests.cs** - Tests for LinkClickedCommand (3 tests)
 
-### Total: 66 tests, all passing ✅
+### Total: 70 tests, all passing ✅
 
 ## Test Philosophy
 

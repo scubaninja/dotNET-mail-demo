@@ -114,7 +114,7 @@ This is a test email body.
         var email = new MarkdownEmail();
 
         // Act & Assert
-        var exception = Assert.Throws<Exception>(() => MarkdownEmail.FromString(null));
+        var exception = Assert.Throws<Exception>(() => MarkdownEmail.FromString(null!));
         Assert.Contains("Markdown is null", exception.Message);
     }
 }

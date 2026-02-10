@@ -52,4 +52,18 @@ public class ContactTests
         Assert.False(contact.Subscribed);
         Assert.Null(contact.ID);
     }
+
+    [Fact]
+    public void Contact_MultipleInstances_GenerateUniqueKeys()
+    {
+        // Arrange & Act
+        var contact1 = new Contact();
+        var contact2 = new Contact();
+        var contact3 = new Contact();
+
+        // Assert
+        Assert.NotEqual(contact1.Key, contact2.Key);
+        Assert.NotEqual(contact2.Key, contact3.Key);
+        Assert.NotEqual(contact1.Key, contact3.Key);
+    }
 }

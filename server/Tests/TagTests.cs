@@ -57,6 +57,33 @@ public class TagTests
         // Assert
         Assert.Equal("This is a test tag", tag.Description);
     }
+
+    [Fact]
+    public void Tag_Slug_WithSpecialCharacters_RemovesOrReplacesCorrectly()
+    {
+        // Arrange
+        var name = "Test & Special!";
+
+        // Act
+        var tag = new Tag(name);
+
+        // Assert
+        // The implementation converts spaces to hyphens and lowercases
+        Assert.Equal("test-&-special!", tag.Slug);
+    }
+
+    [Fact]
+    public void Tag_Slug_WithNumbers_KeepsNumbers()
+    {
+        // Arrange
+        var name = "Tag 123 Test";
+
+        // Act
+        var tag = new Tag(name);
+
+        // Assert
+        Assert.Equal("tag-123-test", tag.Slug);
+    }
 }
 
 public class TaggedTests

@@ -52,12 +52,12 @@ Tests are organized by component type:
 ## Test Coverage
 
 Current test statistics:
-- **Total Tests**: 66
-- **Passing**: 66
+- **Total Tests**: 70
+- **Passing**: 70
 - **Failing**: 0
 
 ### Coverage by Component:
-- Models: ✅ Comprehensive (52 tests)
+- Models: ✅ Comprehensive (56 tests)
 - Commands: ✅ Basic structure tests (14 tests)
 - API Endpoints: 📋 Planned
 - Services: 📋 Planned

@@ -152,4 +152,22 @@ public class MessageTests
         Assert.True(message.SentAt >= beforeSent);
         Assert.True(message.SentAt <= DateTimeOffset.UtcNow);
     }
+
+    [Fact]
+    public void Message_ReadyToSend_EmptyStringsForRequiredFields_ReturnsFalse()
+    {
+        // Arrange
+        var message = new Message();
+        message.Status = "pending";
+        message.SendTo = "";
+        message.SendFrom = "from@example.com";
+        message.Subject = "Subject";
+        message.Html = "<p>HTML</p>";
+
+        // Act
+        var isReady = message.ReadyToSend();
+
+        // Assert
+        Assert.False(isReady);
+    }
 }
