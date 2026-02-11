@@ -1,38 +1,38 @@
-# Welcome to Tailwind Traders Mail Service
+# Tailwind Traders Mail Service へようこそ
 
-We all need email... for better or worse. This service will send transactional emails via API or batch emails to a list, using a tag or predefined segment, like MailChimp does.
+メールは好むと好まざるとにかかわらず、誰にでも必要です。このサービスは、API 経由でトランザクションメールを送信したり、MailChimp のようにタグやセグメントを使ってリストへの一括メール送信を行います。
 
-> **Note:** This project is under active development. Contributions and feedback are welcome!
+> **注意:** このプロジェクトは現在活発に開発中です。コントリビューションやフィードバックを歓迎します！
 
-## What's In the Box
+## 含まれるもの
 
-- **Server** — A .NET 8 Minimal API for managing contacts, broadcasts, and email sending ([server/](./server/))
-- **CLI** — A Node.js command-line tool for creating broadcasts from markdown files ([cli/](./cli/))
-- **Jobs** — A Go-based job runner for background email processing and Azure integrations ([jobs/](./jobs/))
-- **Database** — PostgreSQL schema and seed data ([db/](./db/))
+- **Server** — コンタクト管理、ブロードキャスト、メール送信のための .NET 8 Minimal API ([server/](./server/))
+- **CLI** — Markdown ファイルからブロードキャストを作成する Node.js コマンドラインツール ([cli/](./cli/))
+- **Jobs** — バックグラウンドメール処理と Azure 連携のための Go ベースのジョブランナー ([jobs/](./jobs/))
+- **Database** — PostgreSQL スキーマとシードデータ ([db/](./db/))
 
-## Prerequisites
+## 前提条件
 
-| Tool | Version | Notes |
-|------|---------|-------|
-| [.NET SDK](https://dotnet.microsoft.com/download) | 8.0+ | For the server API |
-| [PostgreSQL](https://www.postgresql.org/download/) | 14+ | Primary database |
-| [Docker](https://docs.docker.com/get-docker/) | Latest | For Mailpit and optional containerized workflows |
-| [Node.js](https://nodejs.org/) | LTS 20+ | For the CLI tool (optional) |
-| [Go](https://go.dev/dl/) | 1.21+ | For the jobs runner (optional) |
+| ツール | バージョン | 備考 |
+|--------|-----------|------|
+| [.NET SDK](https://dotnet.microsoft.com/download) | 8.0 以上 | サーバー API 用 |
+| [PostgreSQL](https://www.postgresql.org/download/) | 14 以上 | メインデータベース |
+| [Docker](https://docs.docker.com/get-docker/) | 最新版 | Mailpit およびコンテナ化ワークフロー用 |
+| [Node.js](https://nodejs.org/) | LTS 20 以上 | CLI ツール用（任意） |
+| [Go](https://go.dev/dl/) | 1.21 以上 | ジョブランナー用（任意） |
 
-## Quick Start
+## クイックスタート
 
-### 1. Clone the repository
+### 1. リポジトリをクローンする
 
 ```bash
 git clone https://github.com/scubaninja/dotNET-mail-demo.git
 cd dotNET-mail-demo
 ```
 
-### 2. Set up the database
+### 2. データベースをセットアップする
 
-Make sure PostgreSQL is running, then create the database and load the schema:
+PostgreSQL が起動していることを確認し、データベースを作成してスキーマを読み込みます：
 
 ```bash
 createdb tailwind
@@ -40,131 +40,131 @@ cd db
 make db
 ```
 
-Optionally seed sample data:
+サンプルデータのシードは任意です：
 
 ```bash
 cd ../server
 make seed
 ```
 
-### 3. Configure environment variables
+### 3. 環境変数を設定する
 
-Create a `.env` file (or export variables) for the server. At minimum you need:
+サーバー用の `.env` ファイルを作成（または変数をエクスポート）します。最低限以下が必要です：
 
 ```bash
 ASPNETCORE_ENVIRONMENT="Development"
 DATABASE_URL="postgres://localhost/tailwind"
 
-# SMTP settings — use Ethereal (https://ethereal.email) for free test credentials
+# SMTP 設定 — Ethereal (https://ethereal.email) で無料のテスト用認証情報を取得できます
 SMTP_USER=""
 SMTP_PASSWORD=""
 SMTP_HOST=""
 
 DEFAULT_FROM="test@tailwind.dev"
 
-# Set to "local" to enable the background email send worker
+# "local" に設定するとバックグラウンドメール送信ワーカーが有効になります
 SEND_WORKER="local"
 ```
 
-### 4. Start the local email testing server
+### 4. ローカルメールテストサーバーを起動する
 
-[Mailpit](https://github.com/axllent/mailpit) captures outgoing emails so you can inspect them in a browser:
+[Mailpit](https://github.com/axllent/mailpit) は送信メールをキャプチャし、ブラウザで確認できるようにします：
 
 ```bash
 cd server
 make mailpit
 ```
 
-Open [http://localhost:8025](http://localhost:8025) to view captured emails.
+[http://localhost:8025](http://localhost:8025) を開いてキャプチャされたメールを確認できます。
 
-### 5. Run the API server
+### 5. API サーバーを起動する
 
 ```bash
 cd server
 dotnet watch
 ```
 
-The API (with Swagger UI) will be available at [http://localhost:5000](http://localhost:5000).
+API（Swagger UI 付き）は [http://localhost:5000](http://localhost:5000) で利用できます。
 
-## API Overview
+## API 概要
 
-The API is documented via Swagger/OpenAPI. Once the server is running, visit the root URL to explore endpoints interactively.
+API は Swagger/OpenAPI で文書化されています。サーバー起動後、ルート URL にアクセスしてエンドポイントをインタラクティブに確認できます。
 
-### Public Endpoints
+### パブリックエンドポイント
 
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/about` | API information |
-| `POST` | `/signup` | Sign up for the mailing list |
-| `GET` | `/unsubscribe/{key}` | Unsubscribe using a unique key |
-| `GET` | `/link/clicked/{key}` | Track a link click |
+| メソッド | パス | 説明 |
+|---------|------|------|
+| `GET` | `/about` | API 情報 |
+| `POST` | `/signup` | メーリングリストへの登録 |
+| `GET` | `/unsubscribe/{key}` | 固有キーによる配信停止 |
+| `GET` | `/link/clicked/{key}` | リンククリックの追跡 |
 
-### Admin Endpoints
+### 管理者エンドポイント
 
-| Area | Description |
-|------|-------------|
-| Broadcasts | Create and manage bulk email campaigns |
-| Contacts | Manage subscriber contacts and tags |
-| Bulk Operations | Batch tag and segment operations |
+| 領域 | 説明 |
+|------|------|
+| Broadcasts | 一括メールキャンペーンの作成と管理 |
+| Contacts | 購読者のコンタクトとタグの管理 |
+| Bulk Operations | タグとセグメントの一括操作 |
 
-## Project Structure
+## プロジェクト構成
 
 ```
 dotNET-mail-demo/
 ├── server/               # .NET 8 Minimal API
-│   ├── Api/              # Route handlers (public + admin)
-│   ├── Models/           # Data models (Contact, Message, Broadcast, etc.)
-│   ├── Data/             # Database access layer (Dapper ORM)
-│   ├── Services/         # Background send, AI, email sender
-│   ├── Commands/         # Command pattern implementations
-│   ├── Tests/            # xUnit tests
-│   └── Makefile          # Build/run/test shortcuts
-├── cli/                  # Node.js CLI for markdown-based broadcasts
-├── db/                   # PostgreSQL schema (db.sql) and seed data (seed.sql)
-├── jobs/                 # Go-based job runner (Mage)
-├── deploy/               # Deployment resources (Azure/Docker/K8s)
-├── docs/                 # Additional documentation
-└── docker-compose.yml    # Docker Compose configuration
+│   ├── Api/              # ルートハンドラー（パブリック + 管理者）
+│   ├── Models/           # データモデル（Contact, Message, Broadcast など）
+│   ├── Data/             # データベースアクセス層（Dapper ORM）
+│   ├── Services/         # バックグラウンド送信、AI、メール送信
+│   ├── Commands/         # コマンドパターンの実装
+│   ├── Tests/            # xUnit テスト
+│   └── Makefile          # ビルド・実行・テストのショートカット
+├── cli/                  # Markdown ベースのブロードキャスト用 Node.js CLI
+├── db/                   # PostgreSQL スキーマ (db.sql) とシードデータ (seed.sql)
+├── jobs/                 # Go ベースのジョブランナー（Mage）
+├── deploy/               # デプロイメントリソース（Azure/Docker/K8s）
+├── docs/                 # 追加ドキュメント
+└── docker-compose.yml    # Docker Compose 設定
 ```
 
-## Running Tests
+## テストの実行
 
-Tests use [xUnit](https://xunit.net/) and live in `server/Tests/`. Run them with:
+テストは [xUnit](https://xunit.net/) を使用し、`server/Tests/` に配置されています。以下のコマンドで実行します：
 
 ```bash
 cd server
 make test
 ```
 
-Or directly:
+または直接実行：
 
 ```bash
 cd server
 dotnet test
 ```
 
-## Using the CLI
+## CLI の使い方
 
-The CLI reads markdown files and creates broadcasts. See [cli/README.md](./cli/README.md) for full details.
+CLI は Markdown ファイルを読み込み、ブロードキャストを作成します。詳細は [cli/README.md](./cli/README.md) を参照してください。
 
 ```bash
 cd cli
 npm install
-alias mdmail="node ./bin/mdmail.js"  # add to your shell profile to persist
+alias mdmail="node ./bin/mdmail.js"  # 永続化するにはシェルプロファイルに追加してください
 ```
 
-## Deployment
+## デプロイ
 
-Deployment resources for Azure, Docker, and Kubernetes are in the [deploy/](./deploy/) directory. The [jobs/](./jobs/) service includes Mage targets for Azure Container Apps, Service Bus, and more — see [jobs/README.md](./jobs/README.md).
+Azure、Docker、Kubernetes 用のデプロイメントリソースは [deploy/](./deploy/) ディレクトリにあります。[jobs/](./jobs/) サービスには Azure Container Apps、Service Bus などの Mage ターゲットが含まれています。詳細は [jobs/README.md](./jobs/README.md) を参照してください。
 
-## Contributing
+## コントリビューション
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b my-feature`)
-3. Make your changes
-4. Run the tests (`cd server && make test`)
-5. Open a pull request
+1. リポジトリをフォークする
+2. フィーチャーブランチを作成する（`git checkout -b my-feature`）
+3. 変更を加える
+4. テストを実行する（`cd server && make test`）
+5. プルリクエストを作成する
 
-## License
+## ライセンス
 
-This project is licensed under the [MIT License](https://opensource.org/license/mit/).
+このプロジェクトは [MIT License](https://opensource.org/license/mit/) の下でライセンスされています。
