@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: tailwind-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-tailwind}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-tailwind_dev_password}
+      POSTGRES_DB: ${POSTGRES_DB:-tailwind}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db/db.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ./db/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-tailwind}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - tailwind-network
+
+  mail-server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: tailwind-mail-server
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Development}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-tailwind}:${POSTGRES_PASSWORD:-tailwind_dev_password}@postgres:5432/${POSTGRES_DB:-tailwind}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      SMTP_HOST: ${SMTP_HOST}
+      DEFAULT_FROM: ${DEFAULT_FROM:-test@tailwind.dev}
+      ETHEREAL_USER: ${ETHEREAL_USER}
+      ETHEREAL_PASSWORD: ${ETHEREAL_PASSWORD}
+    ports:
+      - "${SERVER_PORT:-5000}:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - tailwind-network
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  tailwind-network:
+    driver: bridge
