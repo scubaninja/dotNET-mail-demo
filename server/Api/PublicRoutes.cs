@@ -17,7 +17,7 @@ public class PublicRoutes{
     app.MapGet("/health", ([FromServices] IDb db) => {
       try {
         using var conn = db.Connect();
-        var result = conn.QueryFirstOrDefault<int>("SELECT 1");
+        conn.QueryFirstOrDefault<int>("SELECT 1");
         return Results.Ok(new { status = "healthy", database = "connected" });
       } catch (Exception ex) {
         return Results.Json(new { status = "unhealthy", database = "disconnected", error = ex.Message }, statusCode: 503);

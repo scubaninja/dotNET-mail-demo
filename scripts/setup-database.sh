@@ -103,7 +103,7 @@ run_seed() {
 verify_setup() {
     print_info "Verifying database setup..."
     
-    TABLE_COUNT=$(PGPASSWORD=$DB_PASSWORD psql -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_NAME -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'mail';" 2>/dev/null || echo "0")
+    TABLE_COUNT=$(PGPASSWORD=$DB_PASSWORD psql -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_NAME -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'mail';" 2>/dev/null | xargs || echo "0")
     
     if [ "$TABLE_COUNT" -gt 0 ]; then
         print_success "Found $TABLE_COUNT tables in 'mail' schema"
