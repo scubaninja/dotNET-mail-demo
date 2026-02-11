@@ -13,6 +13,21 @@ public class PublicRoutes{
   public static void MapRoutes(IEndpointRouteBuilder app)
   {
 
+    // Health check endpoint for monitoring
+    app.MapGet("/health", ([FromServices] IDb db) => {
+      try {
+        using var conn = db.Connect();
+        conn.QueryFirstOrDefault<int>("SELECT 1");
+        return Results.Ok(new { status = "healthy", database = "connected" });
+      } catch (Exception ex) {
+        return Results.Json(new { status = "unhealthy", database = "disconnected", error = ex.Message }, statusCode: 503);
+      }
+    }).WithOpenApi(op => {
+      op.Summary = "Health check endpoint";
+      op.Description = "Returns the health status of the API and database connection";
+      return op;
+    });
+
     //public routes
     app.MapGet("/about", () => "Tailwind Traders Mail Services API").WithOpenApi(op => {
       op.Summary = "Information about the API";
