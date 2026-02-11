@@ -103,18 +103,26 @@ run_seed() {
 verify_setup() {
     print_info "Verifying database setup..."
     
-    TABLE_COUNT=$(PGPASSWORD=$DB_PASSWORD psql -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_NAME -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'mail';" 2>/dev/null | xargs || echo "0")
-    
-    if [ "$TABLE_COUNT" -gt 0 ]; then
-        print_success "Found $TABLE_COUNT tables in 'mail' schema"
-        
-        # List tables
-        print_info "Tables in database:"
-        PGPASSWORD=$DB_PASSWORD psql -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_NAME -c "\dt mail.*"
-    else
-        print_error "No tables found in 'mail' schema"
-        exit 1
+    # First check if we can connect
+    if ! PGPASSWORD=$DB_PASSWORD psql -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_NAME -c "SELECT 1" > /dev/null 2>&1; then
+        print_error "Cannot connect to database '$DB_NAME'"
+        return 1
     fi
+    
+    # Then check table count
+    TABLE_COUNT=$(PGPASSWORD=$DB_PASSWORD psql -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_NAME -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'mail';" 2>/dev/null | xargs)
+    
+    if [ -z "$TABLE_COUNT" ] || [ "$TABLE_COUNT" = "0" ]; then
+        print_error "No tables found in 'mail' schema"
+        print_info "Run the schema setup: $0 setup"
+        return 1
+    fi
+    
+    print_success "Found $TABLE_COUNT tables in 'mail' schema"
+    
+    # List tables
+    print_info "Tables in database:"
+    PGPASSWORD=$DB_PASSWORD psql -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_NAME -c "\dt mail.*"
 }
 
 # Function to test connection
@@ -195,7 +203,7 @@ main() {
                 run_seed
             fi
             
-            verify_setup
+            verify_setup || exit 1
             print_success "Database setup complete!"
             echo ""
             print_info "Connection string:"
@@ -207,12 +215,12 @@ main() {
             PGPASSWORD=$DB_PASSWORD psql -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_NAME -c "DROP SCHEMA IF EXISTS mail CASCADE;" -q
             run_schema
             run_seed
-            verify_setup
+            verify_setup || exit 1
             print_success "Database reset complete!"
             ;;
             
         verify)
-            verify_setup
+            verify_setup || exit 1
             ;;
             
         test)
