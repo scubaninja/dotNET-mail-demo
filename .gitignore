@@ -27,7 +27,6 @@ bld/
 
 # Visual Studio cache/options
 .vs/
-.vscode/
 
 # JetBrains Rider
 .idea/
