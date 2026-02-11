@@ -13,7 +13,7 @@ public class PublicRoutes{
   public static void MapRoutes(IEndpointRouteBuilder app)
   {
 
-    //health check endpoint
+    // Health check endpoint for monitoring
     app.MapGet("/health", ([FromServices] IDb db) => {
       try {
         using var conn = db.Connect();

@@ -161,7 +161,9 @@ main() {
     # Load .env if exists
     if [ -f ".env" ]; then
         print_info "Loading environment variables from .env"
-        export $(cat .env | grep -v '^#' | xargs)
+        set -a
+        source .env
+        set +a
         
         # Reload variables after loading .env
         DB_USER="${POSTGRES_USER:-tailwind}"

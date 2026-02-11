@@ -247,7 +247,7 @@ dotnet test --configuration Debug
 Npgsql provides connection pooling by default. Adjust pool settings in the connection string:
 
 ```
-postgresql://user:pass@host:5432/db?Pooling=true;MinPoolSize=1;MaxPoolSize=20;
+postgresql://user:pass@host:5432/db?Pooling=true&MinPoolSize=1&MaxPoolSize=20
 ```
 
 ### Monitoring
