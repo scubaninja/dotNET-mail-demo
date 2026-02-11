@@ -1,0 +1,47 @@
+/* Custom Swagger UI Styling - Text Color Changes */
+
+/* Change main body text color to a darker blue */
+body {
+    color: #1e3a8a !important;
+}
+
+/* Change heading colors to a vibrant blue */
+.swagger-ui .info .title,
+.swagger-ui h1,
+.swagger-ui h2,
+.swagger-ui h3,
+.swagger-ui h4,
+.swagger-ui h5,
+.swagger-ui h6 {
+    color: #2563eb !important;
+}
+
+/* Change description text to a readable dark gray-blue */
+.swagger-ui .info .description,
+.swagger-ui .markdown p,
+.swagger-ui .renderedMarkdown p {
+    color: #1e40af !important;
+}
+
+/* Change parameter names and labels */
+.swagger-ui .parameter__name,
+.swagger-ui .parameter__type,
+.swagger-ui table thead tr th {
+    color: #1e3a8a !important;
+}
+
+/* Change operation summaries */
+.swagger-ui .opblock .opblock-summary-description {
+    color: #1e40af !important;
+}
+
+/* Change model property names */
+.swagger-ui table.model tbody tr td:first-of-type {
+    color: #2563eb !important;
+}
+
+/* Change response text */
+.swagger-ui .response-col_status,
+.swagger-ui .response-col_description {
+    color: #1e3a8a !important;
+}

@@ -36,11 +36,13 @@ builder.Services.AddSwaggerGen(options =>
 
 var app = builder.Build();
 
+app.UseStaticFiles();
 app.UseSwagger();
 app.UseSwaggerUI(options =>
 {
     options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
     options.RoutePrefix = string.Empty;
+    options.InjectStylesheet("/swagger-custom.css");
 });
 var conn = DB.Postgres();
 Tailwind.Mail.Api.PublicRoutes.MapRoutes(app);
