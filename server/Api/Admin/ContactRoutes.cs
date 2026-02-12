@@ -30,11 +30,13 @@ public class ContactRoutes{
       response.Contacts = conn.Query<Contact>(sql, new {term});
       return response;
     }).WithOpenApi(op => {
-      op.Summary = "Find one or more contacts using a fuzzy match on email or name";
-      op.Description = "Find a set of contacts using a search term";
+      op.Summary = "🔍 Search Contacts";
+      op.Description = "Find contacts using fuzzy search on email or name fields. Returns all matching contacts for the provided search term.";
+      op.Parameters[0].Description = "Search term to match against contact names or email addresses";
       return op;
     }).Produces<ContactSearchResponse>()
-    .Produces(500);
+    .Produces(500)
+    .WithTags("Admin - Contacts");
   }
 }
 public interface IQuantifiedList{

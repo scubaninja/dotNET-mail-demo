@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tailwind Traders Mail API - UI Preview</title>
+    <link rel="stylesheet" href="/css/swagger-custom.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-attachment: fixed;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: #f8fafc;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 2rem;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #0ea5e9 0%, #8b5cf6 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 0 0 0.5rem 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            margin: 0.5rem 0;
+            opacity: 0.95;
+        }
+        
+        .section {
+            margin-bottom: 2rem;
+        }
+        
+        .section h2 {
+            color: #1e293b;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .endpoint {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .endpoint:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .endpoint-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .method {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.875rem;
+            color: white;
+        }
+        
+        .method.get {
+            background: #10b981;
+        }
+        
+        .method.post {
+            background: #0ea5e9;
+        }
+        
+        .method.put {
+            background: #f59e0b;
+        }
+        
+        .method.delete {
+            background: #ef4444;
+        }
+        
+        .path {
+            font-family: 'Consolas', 'Monaco', monospace;
+            color: #1e293b;
+            font-weight: 600;
+        }
+        
+        .description {
+            color: #64748b;
+            line-height: 1.6;
+            margin-top: 0.5rem;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .feature {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border-left: 4px solid #0ea5e9;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .feature h3 {
+            color: #1e293b;
+            margin: 0 0 0.5rem 0;
+            font-size: 1.2rem;
+        }
+        
+        .feature p {
+            color: #64748b;
+            margin: 0;
+            line-height: 1.6;
+        }
+        
+        .tag {
+            background: rgba(14, 165, 233, 0.1);
+            color: #0ea5e9;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📧 Tailwind Traders Mail Services API</h1>
+            <p><strong>Version:</strong> v1.0.2</p>
+            <p>A powerful, modern email service platform for transactional and bulk email sending.</p>
+        </div>
+        
+        <div class="section">
+            <h2>🎨 UI Improvements</h2>
+            <div class="features">
+                <div class="feature">
+                    <h3>✨ Modern Design</h3>
+                    <p>Beautiful gradient backgrounds and smooth animations create a professional, engaging experience.</p>
+                </div>
+                <div class="feature">
+                    <h3>🎯 Better Organization</h3>
+                    <p>Endpoints are grouped into logical categories with emojis for quick visual identification.</p>
+                </div>
+                <div class="feature">
+                    <h3>📝 Enhanced Documentation</h3>
+                    <p>Detailed descriptions and clear explanations help developers understand each endpoint's purpose.</p>
+                </div>
+                <div class="feature">
+                    <h3>🚀 Improved UX</h3>
+                    <p>Interactive elements, hover effects, and better color coding make navigation intuitive.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>Public Endpoints</h2>
+            
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="path">/about</span>
+                </div>
+                <div class="description">
+                    <strong>📋 Get API Information</strong><br>
+                    Returns basic information about the Tailwind Traders Mail Services API, including version and capabilities.
+                </div>
+                <span class="tag">Public</span>
+            </div>
+            
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method post">POST</span>
+                    <span class="path">/signup</span>
+                </div>
+                <div class="description">
+                    <strong>✉️ Sign Up New Contact</strong><br>
+                    Adds a new contact to the mailing list. This endpoint is typically used by website signup forms to collect new subscribers.
+                </div>
+                <span class="tag">Public</span>
+            </div>
+            
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="path">/unsubscribe/{key}</span>
+                </div>
+                <div class="description">
+                    <strong>🚫 Unsubscribe Contact</strong><br>
+                    Allows a contact to opt-out from the mailing list using their unique unsubscribe key.
+                </div>
+                <span class="tag">Public</span>
+            </div>
+            
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="path">/link/clicked/{key}</span>
+                </div>
+                <div class="description">
+                    <strong>🔗 Track Link Click</strong><br>
+                    Records when a contact clicks a tracked link in an email. This endpoint collects engagement metrics.
+                </div>
+                <span class="tag">Public</span>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>Admin Endpoints</h2>
+            
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method post">POST</span>
+                    <span class="path">/admin/queue-broadcast</span>
+                </div>
+                <div class="description">
+                    <strong>📤 Queue Email Broadcast</strong><br>
+                    Creates and queues a new broadcast email campaign from markdown content. Messages will be sent to all opted-in contacts.
+                </div>
+                <span class="tag">Admin - Broadcasts</span>
+            </div>
+            
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method post">POST</span>
+                    <span class="path">/admin/validate</span>
+                </div>
+                <div class="description">
+                    <strong>✅ Validate Email Markdown</strong><br>
+                    Validates markdown content for a broadcast email before sending. Returns validation status and estimated contact count.
+                </div>
+                <span class="tag">Admin - Broadcasts</span>
+            </div>
+            
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="path">/admin/contacts/search</span>
+                </div>
+                <div class="description">
+                    <strong>🔍 Search Contacts</strong><br>
+                    Find contacts using fuzzy search on email or name fields. Returns all matching contacts.
+                </div>
+                <span class="tag">Admin - Contacts</span>
+            </div>
+            
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method post">POST</span>
+                    <span class="path">/admin/bulk/contacts/tag</span>
+                </div>
+                <div class="description">
+                    <strong>🏷️ Bulk Tag Contacts</strong><br>
+                    Apply one or more tags to multiple contacts at once. Useful for organizing contacts into segments.
+                </div>
+                <span class="tag">Admin - Bulk Operations</span>
+            </div>
+            
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method post">POST</span>
+                    <span class="path">/admin/get-chat</span>
+                </div>
+                <div class="description">
+                    <strong>🤖 AI Chat Assistant</strong><br>
+                    Get AI-powered assistance for creating email content. Send a prompt and receive intelligent suggestions.
+                </div>
+                <span class="tag">Admin - AI Assistant</span>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

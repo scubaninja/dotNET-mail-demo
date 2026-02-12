@@ -1,0 +1,297 @@
+/* Custom Swagger UI Styling for Tailwind Traders Mail Service */
+
+/* Main color scheme - Tailwind inspired */
+:root {
+    --primary-color: #0ea5e9;
+    --primary-hover: #0284c7;
+    --secondary-color: #8b5cf6;
+    --success-color: #10b981;
+    --background: #f8fafc;
+    --surface: #ffffff;
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --border-color: #e2e8f0;
+}
+
+/* Global styling */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background-attachment: fixed;
+}
+
+/* Swagger UI Container */
+.swagger-ui {
+    background: var(--background);
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    margin: 2rem auto;
+    max-width: 1400px;
+    padding: 2rem;
+}
+
+/* Header/Title Section */
+.swagger-ui .info {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.swagger-ui .info .title {
+    color: white !important;
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.swagger-ui .info .description {
+    color: rgba(255, 255, 255, 0.95) !important;
+    font-size: 1.1rem;
+    line-height: 1.6;
+}
+
+.swagger-ui .info a {
+    color: white !important;
+    text-decoration: underline;
+    font-weight: 600;
+}
+
+/* Operation blocks */
+.swagger-ui .opblock {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.swagger-ui .opblock:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+/* HTTP Method badges */
+.swagger-ui .opblock.opblock-get {
+    border-left: 4px solid #10b981;
+}
+
+.swagger-ui .opblock.opblock-post {
+    border-left: 4px solid var(--primary-color);
+}
+
+.swagger-ui .opblock.opblock-put {
+    border-left: 4px solid #f59e0b;
+}
+
+.swagger-ui .opblock.opblock-delete {
+    border-left: 4px solid #ef4444;
+}
+
+.swagger-ui .opblock-summary-method {
+    border-radius: 6px;
+    font-weight: 700;
+    padding: 6px 12px;
+    text-transform: uppercase;
+    font-size: 0.875rem;
+}
+
+.swagger-ui .opblock-get .opblock-summary-method {
+    background: #10b981;
+}
+
+.swagger-ui .opblock-post .opblock-summary-method {
+    background: var(--primary-color);
+}
+
+.swagger-ui .opblock-put .opblock-summary-method {
+    background: #f59e0b;
+}
+
+.swagger-ui .opblock-delete .opblock-summary-method {
+    background: #ef4444;
+}
+
+/* Operation descriptions */
+.swagger-ui .opblock-summary-description {
+    font-size: 1rem;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+/* Try it out button */
+.swagger-ui .btn.try-out__btn {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.swagger-ui .btn.try-out__btn:hover {
+    background: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(14, 165, 233, 0.3);
+}
+
+/* Execute button */
+.swagger-ui .btn.execute {
+    background: var(--secondary-color);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 20px;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.swagger-ui .btn.execute:hover {
+    background: #7c3aed;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+}
+
+/* Response section */
+.swagger-ui .responses-wrapper {
+    background: var(--surface);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 1rem;
+}
+
+.swagger-ui .response-col_status {
+    font-weight: 700;
+}
+
+/* Tables */
+.swagger-ui table {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.swagger-ui table thead tr {
+    background: var(--primary-color);
+    color: white;
+}
+
+.swagger-ui table thead tr th {
+    color: white;
+    font-weight: 600;
+    padding: 12px;
+}
+
+/* Models section */
+.swagger-ui .model-box {
+    background: var(--surface);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.swagger-ui .model-title {
+    color: var(--text-primary);
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+/* Authorization section */
+.swagger-ui .auth-wrapper {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* Parameters */
+.swagger-ui .parameters-col_description input[type=text],
+.swagger-ui .parameters-col_description select,
+.swagger-ui .parameters-col_description textarea {
+    border: 2px solid var(--border-color);
+    border-radius: 6px;
+    padding: 8px 12px;
+    transition: all 0.3s ease;
+}
+
+.swagger-ui .parameters-col_description input[type=text]:focus,
+.swagger-ui .parameters-col_description select:focus,
+.swagger-ui .parameters-col_description textarea:focus {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+/* Scheme container */
+.swagger-ui .scheme-container {
+    background: var(--surface);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Loading animation enhancement */
+.swagger-ui .loading-container {
+    background: var(--background);
+}
+
+/* Scrollbar styling */
+.swagger-ui ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+.swagger-ui ::-webkit-scrollbar-track {
+    background: var(--background);
+    border-radius: 5px;
+}
+
+.swagger-ui ::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 5px;
+}
+
+.swagger-ui ::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-hover);
+}
+
+/* Add some spacing and polish */
+.swagger-ui .opblock-section {
+    padding: 1rem;
+}
+
+.swagger-ui .opblock-body pre {
+    background: #1e293b;
+    color: #e2e8f0;
+    border-radius: 6px;
+    padding: 1rem;
+}
+
+/* Topbar override if exists */
+.swagger-ui .topbar {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    padding: 1rem 0;
+}
+
+/* Information section links */
+.swagger-ui .info .url {
+    color: white !important;
+    font-weight: 600;
+}
+
+/* Markdown rendering improvements */
+.swagger-ui .renderedMarkdown p {
+    margin: 0.5rem 0;
+    line-height: 1.6;
+}
+
+.swagger-ui .renderedMarkdown code {
+    background: rgba(14, 165, 233, 0.1);
+    color: var(--primary-color);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: 'Consolas', 'Monaco', monospace;
+}

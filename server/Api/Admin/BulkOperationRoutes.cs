@@ -49,10 +49,12 @@ public class BulkOperationRoutes{
         Message = $"{tags.Count()} Tag(s) applied to {request.Emails.Count()} contacts"  
       };
     }).WithOpenApi(op => {
-      op.Summary = "Tag a set of contacts";
-      op.Description = "Tag a set of contacts";
+      op.Summary = "🏷️ Bulk Tag Contacts";
+      op.Description = "Apply one or more tags to multiple contacts at once. Useful for organizing contacts into segments for targeted campaigns. Separate multiple tags with commas.";
+      op.RequestBody.Description = "List of email addresses and tag(s) to apply";
       return op;
     }).Produces<CommandResult>()
-    .Produces(500);
+    .Produces(500)
+    .WithTags("Admin - Bulk Operations");
   }
 }
