@@ -1,0 +1,44 @@
+# Testing dependencies for Tailwind Traders Mail Service
+
+# Core testing framework
+pytest==7.4.3
+pytest-cov==4.1.0
+pytest-asyncio==0.21.1
+pytest-mock==3.12.0
+pytest-timeout==2.2.0
+pytest-xdist==3.5.0  # For parallel test execution
+
+# Coverage reporting
+coverage[toml]==7.3.2
+
+# Mocking and fixtures
+factory-boy==3.3.0  # For creating test data
+faker==20.1.0  # For generating fake data
+freezegun==1.4.0  # For mocking datetime
+
+# HTTP testing
+httpx==0.25.2  # For testing async HTTP clients
+requests-mock==1.11.0
+
+# Database testing
+pytest-postgresql==5.0.0  # For PostgreSQL test fixtures
+sqlalchemy==2.0.23  # If using SQLAlchemy
+
+# Accessibility testing
+axe-selenium-python==2.1.6  # For automated accessibility testing
+pa11y==0.1.0  # Python wrapper for pa11y
+
+# Code quality
+pylint==3.0.3
+flake8==6.1.0
+black==23.12.1
+mypy==1.7.1
+isort==5.13.2
+
+# Security testing
+bandit==1.7.5  # Security linter
+safety==2.3.5  # Dependency security checker
+
+# Documentation
+pytest-html==4.1.1  # HTML test reports
+allure-pytest==2.13.2  # Allure test reports
