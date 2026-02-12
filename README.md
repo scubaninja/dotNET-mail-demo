@@ -189,7 +189,7 @@ cd server
 dotnet build --configuration Debug
 ```
 
-> **Note:** Package references only load in Debug mode. Always use `--configuration Debug` for development.
+> **Note:** This project has a custom configuration where package references are only included when not building in Release mode (see `Tailwind.Mail.csproj`). Always use `--configuration Debug` for development to ensure all dependencies are available.
 
 ### Working with the CLI
 
