@@ -5,7 +5,7 @@ namespace Tailwind.Mail.Models;
 
 //The process of creating a broadcast is:
 //The initial data is created first (name, slug)
-//The the email and finally the segment to send to, which is done by tag (or not)
+//Then the email and finally the segment to send to, which is done by tag (or not)
 //If the initial use case is using a markdown document, then it should contain all 
 //that we need
 [Table("broadcasts", Schema = "mail")]
@@ -59,7 +59,7 @@ public class Broadcast {
           INNER JOIN mail.tagged ON mail.tagged.contact_id = mail.contacts.id
           INNER JOIN mail.tags ON mail.tags.id = mail.tagged.tag_id
           WHERE subscribed = true
-          AND tags.slug = @tagSlug
+          AND mail.tags.slug = @tagSlug
         ";
         contacts = conn.ExecuteScalar<long>(sql, new { tagSlug = SendToTag });
       }
