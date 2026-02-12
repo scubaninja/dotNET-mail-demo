@@ -1,222 +1,222 @@
 # Tailwind Traders Mail Service
 
-An email management platform for sending transactional and broadcast emails through a REST API. Organize your contacts with tags and send targeted campaigns—similar to services like MailChimp.
+Een e-mailbeheerplatform voor het verzenden van transactionele en broadcast e-mails via een REST API. Organiseer je contacten met tags en verstuur gerichte campagnes—vergelijkbaar met diensten zoals MailChimp.
 
-## What This Project Does
+## Wat Dit Project Doet
 
-This mail service enables you to:
+Met deze mailservice kun je:
 
-- **Send transactional emails** - Trigger individual emails programmatically
-- **Create broadcast campaigns** - Queue bulk emails to all subscribers or specific segments
-- **Manage contacts** - Full CRUD operations for your subscriber list
-- **Segment with tags** - Organize contacts into groups for targeted messaging
-- **Handle subscriptions** - Public endpoints let users opt-in and opt-out
-- **Author emails in Markdown** - Write email content in markdown with YAML frontmatter metadata
-- **Process emails asynchronously** - Background worker handles the actual sending
-- **Explore the API** - Swagger UI documentation available at the root URL
+- **Transactionele e-mails versturen** - Activeer individuele e-mails programmatisch
+- **Broadcast campagnes maken** - Zet bulk e-mails in de wachtrij voor alle abonnees of specifieke segmenten
+- **Contacten beheren** - Volledige CRUD-operaties voor je abonneelijst
+- **Segmenteren met tags** - Organiseer contacten in groepen voor gerichte berichten
+- **Abonnementen afhandelen** - Publieke endpoints laten gebruikers opt-in en opt-out doen
+- **E-mails schrijven in Markdown** - Schrijf e-mailinhoud in markdown met YAML frontmatter metadata
+- **E-mails asynchroon verwerken** - Achtergrondwerker handelt het daadwerkelijke verzenden af
+- **De API verkennen** - Swagger UI documentatie beschikbaar op de root URL
 
-## Architecture Overview
+## Architectuur Overzicht
 
-The project is organized into four main modules:
+Het project is georganiseerd in vier hoofdmodules:
 
-| Module | Technology | Description |
-|--------|------------|-------------|
-| `server/` | .NET 8 Minimal API | The main REST API handling all email operations |
-| `cli/` | Node.js + Commander | Command-line interface for broadcast management |
-| `jobs/` | Go + Mage | Background job processor for email queue |
-| `db/` | PostgreSQL | Persistent storage using the `mail` schema |
+| Module | Technologie | Beschrijving |
+|--------|-------------|--------------|
+| `server/` | .NET 8 Minimal API | De hoofd REST API die alle e-mailoperaties afhandelt |
+| `cli/` | Node.js + Commander | Command-line interface voor broadcast beheer |
+| `jobs/` | Go + Mage | Achtergrondjob processor voor e-mail wachtrij |
+| `db/` | PostgreSQL | Persistente opslag met het `mail` schema |
 
-## What You Need
+## Wat Je Nodig Hebt
 
-Make sure you have these installed:
+Zorg dat je deze hebt geïnstalleerd:
 
 - [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
-- [Node.js LTS 20](https://nodejs.org/) (needed for the CLI)
-- [Go 1.21 or later](https://golang.org/) (needed for the jobs processor)
-- [PostgreSQL 14 or later](https://www.postgresql.org/)
-- [Docker](https://www.docker.com/) (optional, helpful for local mail testing)
+- [Node.js LTS 20](https://nodejs.org/) (nodig voor de CLI)
+- [Go 1.21 of later](https://golang.org/) (nodig voor de jobs processor)
+- [PostgreSQL 14 of later](https://www.postgresql.org/)
+- [Docker](https://www.docker.com/) (optioneel, handig voor lokale e-mail tests)
 
-## Getting Up and Running
+## Aan De Slag
 
-### 1. Get the Code
+### 1. Haal De Code Op
 
-Clone this repository to your local machine:
+Kloon deze repository naar je lokale machine:
 
 ```sh
-cd your-projects-folder
+cd jouw-projecten-map
 git clone <repository-url>
 cd dotNET-mail-demo
 ```
 
-### 2. Set Up PostgreSQL
+### 2. PostgreSQL Instellen
 
-Run the schema script against your database:
+Voer het schema script uit tegen je database:
 
 ```sh
 cd db
-psql mydb < db.sql
-psql mydb < seed.sql  # adds some test contacts
+psql mijndb < db.sql
+psql mijndb < seed.sql  # voegt wat testcontacten toe
 ```
 
-### 3. Configure Environment Variables
+### 3. Omgevingsvariabelen Configureren
 
-You'll need to set these environment variables (create a `.env` file or export them):
+Je moet deze omgevingsvariabelen instellen (maak een `.env` bestand of exporteer ze):
 
-**Required:**
-- `DATABASE_URL` - PostgreSQL connection string in format `postgres://user:pass@host:port/dbname`
-- `ASPNETCORE_ENVIRONMENT` - Set to `Development` for local work
+**Vereist:**
+- `DATABASE_URL` - PostgreSQL connectiestring in formaat `postgres://gebruiker:wachtwoord@host:poort/dbnaam`
+- `ASPNETCORE_ENVIRONMENT` - Zet op `Development` voor lokaal werk
 
-**SMTP Configuration:**
-- `SMTP_HOST` - Your SMTP server hostname
-- `SMTP_USER` - SMTP username
-- `SMTP_PASSWORD` - SMTP password
+**SMTP Configuratie:**
+- `SMTP_HOST` - Je SMTP server hostnaam
+- `SMTP_USER` - SMTP gebruikersnaam
+- `SMTP_PASSWORD` - SMTP wachtwoord
 
-**Optional:**
-- `DEFAULT_FROM` - Default sender email address
-- `ETHEREAL_USER` / `ETHEREAL_PASSWORD` - For testing with Ethereal
-- `SEND_WORKER` - Set to `local` to enable the background email sender
+**Optioneel:**
+- `DEFAULT_FROM` - Standaard afzender e-mailadres
+- `ETHEREAL_USER` / `ETHEREAL_PASSWORD` - Voor testen met Ethereal
+- `SEND_WORKER` - Zet op `local` om de achtergrond e-mail verzender in te schakelen
 
-### 4. Start the Server
+### 4. Start De Server
 
-Navigate to the server directory and run:
+Navigeer naar de server map en voer uit:
 
 ```sh
 cd server
 dotnet run
 ```
 
-Visit `http://localhost:5000` to see the Swagger UI with interactive API documentation.
+Bezoek `http://localhost:5000` om de Swagger UI met interactieve API documentatie te zien.
 
-### 5. Set Up Local Email Capture (Optional)
+### 5. Lokale E-mail Capture Instellen (Optioneel)
 
-During development, use Mailpit to catch outgoing emails without actually sending them:
+Tijdens ontwikkeling, gebruik Mailpit om uitgaande e-mails op te vangen zonder ze daadwerkelijk te verzenden:
 
 ```sh
 cd server
 make mailpit
 ```
 
-This starts:
-- SMTP capture on port 1025
-- Web UI on port 8025 (view captured emails at http://localhost:8025)
+Dit start:
+- SMTP capture op poort 1025
+- Web UI op poort 8025 (bekijk opgevangen e-mails op http://localhost:8025)
 
-## How the Code is Organized
+## Hoe De Code Is Georganiseerd
 
 ```
 dotNET-mail-demo/
 ├── server/                 # .NET 8 REST API
-│   ├── Api/               # Route definitions
-│   │   ├── Admin/         # Admin-only routes (broadcasts, contacts, bulk ops)
-│   │   └── PublicRoutes.cs # Public subscription routes
-│   ├── Commands/          # Business logic commands
-│   ├── Data/              # Database access layer
-│   ├── Models/            # Entity definitions
-│   ├── Services/          # Email sender implementations
-│   └── Tests/             # Unit tests using xUnit
+│   ├── Api/               # Route definities
+│   │   ├── Admin/         # Admin-only routes (broadcasts, contacten, bulk ops)
+│   │   └── PublicRoutes.cs # Publieke abonnement routes
+│   ├── Commands/          # Business logica commando's
+│   ├── Data/              # Database toegangslaag
+│   ├── Models/            # Entiteit definities
+│   ├── Services/          # E-mail verzender implementaties
+│   └── Tests/             # Unit tests met xUnit
 ├── cli/                    # Node.js CLI tool
-│   ├── commands/          # CLI command handlers
+│   ├── commands/          # CLI commando handlers
 │   └── bin/               # Entry point scripts
-├── jobs/                   # Go background processor
-│   ├── queuers/           # Queue handling
-│   ├── senders/           # Email sending implementations
-│   └── deploy/            # Deployment configurations
-├── db/                     # SQL schema and seeds
-│   ├── db.sql             # Schema creation script
-│   └── seed.sql           # Test data
+├── jobs/                   # Go achtergrond processor
+│   ├── queuers/           # Wachtrij afhandeling
+│   ├── senders/           # E-mail verzend implementaties
+│   └── deploy/            # Deployment configuraties
+├── db/                     # SQL schema en seeds
+│   ├── db.sql             # Schema creatie script
+│   └── seed.sql           # Testdata
 ├── deploy/                 # Deployment resources
-└── docs/                   # Additional documentation
+└── docs/                   # Aanvullende documentatie
 ```
 
-## Available API Endpoints
+## Beschikbare API Endpoints
 
-### Public Routes
+### Publieke Routes
 
-| Method | Path | What It Does |
-|--------|------|--------------|
-| `GET` | `/about` | Returns info about the API |
-| `GET` | `/unsubscribe/{key}` | Unsubscribes a contact by their unique key |
-| `GET` | `/link/clicked/{key}` | Logs a link click for tracking |
-| `POST` | `/signup` | Adds a new contact to the list |
+| Methode | Pad | Wat Het Doet |
+|---------|-----|--------------|
+| `GET` | `/about` | Geeft info over de API terug |
+| `GET` | `/unsubscribe/{key}` | Schrijft een contact uit met hun unieke sleutel |
+| `GET` | `/link/clicked/{key}` | Logt een link klik voor tracking |
+| `POST` | `/signup` | Voegt een nieuw contact toe aan de lijst |
 
 ### Admin Routes
 
-| Method | Path | What It Does |
-|--------|------|--------------|
-| `POST` | `/admin/validate` | Validates markdown email content |
-| `POST` | `/admin/queue-broadcast` | Creates a broadcast and queues all messages |
-| `POST` | `/admin/get-chat` | Generates email content with AI |
-| `GET` | `/admin/contacts/search?term={term}` | Searches contacts by name or email |
+| Methode | Pad | Wat Het Doet |
+|---------|-----|--------------|
+| `POST` | `/admin/validate` | Valideert markdown e-mail inhoud |
+| `POST` | `/admin/queue-broadcast` | Maakt een broadcast en zet alle berichten in de wachtrij |
+| `POST` | `/admin/get-chat` | Genereert e-mail inhoud met AI |
+| `GET` | `/admin/contacts/search?term={term}` | Zoekt contacten op naam of e-mail |
 
-## Database Tables
+## Database Tabellen
 
-All tables live in the `mail` schema:
+Alle tabellen bevinden zich in het `mail` schema:
 
-| Table | Purpose |
-|-------|---------|
-| `contacts` | Subscriber information and subscription status |
-| `tags` | Labels for organizing contacts into groups |
-| `tagged` | Junction table linking contacts to their assigned tags |
-| `emails` | Email template storage |
-| `broadcasts` | Campaign metadata and configuration |
-| `messages` | Individual queued emails with delivery status |
-| `activity` | Tracks subscriber interactions |
-| `sequences` | Drip campaign definitions (planned feature) |
+| Tabel | Doel |
+|-------|------|
+| `contacts` | Abonnee informatie en abonnementsstatus |
+| `tags` | Labels voor het organiseren van contacten in groepen |
+| `tagged` | Koppeltabel die contacten aan hun toegewezen tags linkt |
+| `emails` | E-mail template opslag |
+| `broadcasts` | Campagne metadata en configuratie |
+| `messages` | Individuele e-mails in de wachtrij met bezorgstatus |
+| `activity` | Volgt abonnee interacties |
+| `sequences` | Drip campagne definities (geplande functie) |
 
-## Development Workflow
+## Ontwikkel Workflow
 
-### Running Tests
+### Tests Uitvoeren
 
-Execute the test suite:
+Voer de testsuite uit:
 
 ```sh
 cd server
 dotnet test
 ```
 
-Or use the Makefile:
+Of gebruik de Makefile:
 
 ```sh
 cd server
 make test
 ```
 
-### Building the Project
+### Het Project Bouwen
 
-Compile the server application:
+Compileer de server applicatie:
 
 ```sh
 cd server
 dotnet build --configuration Debug
 ```
 
-> **Note:** This project has a custom configuration where package references are only included when not building in Release mode (see `Tailwind.Mail.csproj`). Always use `--configuration Debug` for development to ensure all dependencies are available.
+> **Let op:** Dit project heeft een aangepaste configuratie waarbij package references alleen worden opgenomen wanneer niet in Release modus wordt gebouwd (zie `Tailwind.Mail.csproj`). Gebruik altijd `--configuration Debug` voor ontwikkeling om te zorgen dat alle dependencies beschikbaar zijn.
 
-### Working with the CLI
+### Werken met de CLI
 
-Set up and use the command-line tool:
+Stel de command-line tool in en gebruik deze:
 
 ```sh
 cd cli
 npm install
-source .env  # Sets up aliases
+source .env  # Stelt aliases in
 mdmail --help
 ```
 
-### Using the Jobs Processor
+### De Jobs Processor Gebruiken
 
-Work with the Go-based job runner:
+Werk met de Go-gebaseerde job runner:
 
 ```sh
 cd jobs
-mage  # Shows all available targets
-mage test:hello  # Test that mage is working
+mage  # Toont alle beschikbare targets
+mage test:hello  # Test of mage werkt
 ```
 
-## Deploying the Application
+## De Applicatie Deployen
 
-### Using Docker Compose
+### Met Docker Compose
 
-Build and run all services:
+Bouw en draai alle services:
 
 ```sh
 docker-compose up
@@ -224,24 +224,24 @@ docker-compose up
 
 ### Azure Container Apps
 
-See [jobs/README.md](./jobs/README.md) for detailed Azure deployment instructions using Mage automation targets.
+Zie [jobs/README.md](./jobs/README.md) voor gedetailleerde Azure deployment instructies met Mage automatisering targets.
 
-## Contributing
+## Bijdragen
 
-We welcome contributions! Here's how:
+We verwelkomen bijdragen! Zo doe je dat:
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes with clear commit messages
-4. Push your branch
-5. Open a Pull Request
+1. Fork de repository
+2. Maak een feature branch
+3. Maak je wijzigingen met duidelijke commit berichten
+4. Push je branch
+5. Open een Pull Request
 
-## License
+## Licentie
 
-This project is licensed under the MIT License.
+Dit project is gelicenseerd onder de MIT Licentie.
 
 ## Team & Contact
 
-Built by Rob Conery, Aaron Wislang, and the Tailwind Traders Team.
+Gebouwd door Rob Conery, Aaron Wislang, en het Tailwind Traders Team.
 
-Learn more at https://tailwindtraders.dev
+Meer informatie op https://tailwindtraders.dev
