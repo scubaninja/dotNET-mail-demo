@@ -47,6 +47,7 @@ Tailwind.Mail.Api.PublicRoutes.MapRoutes(app);
 Tailwind.Mail.Api.Admin.BroadcastRoutes.MapRoutes(app);
 Tailwind.Mail.Api.Admin.ContactRoutes.MapRoutes(app);
 Tailwind.Mail.Api.Admin.BulkOperationRoutes.MapRoutes(app);
+Tailwind.Mail.Api.Admin.SettingsRoutes.MapRoutes(app);
 
 app.Run();
 
