@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Account Settings - Tailwind Traders Mail</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 600px;
+      margin: 60px auto;
+      padding: 0 20px;
+      color: #333;
+    }
+    h1 { font-size: 1.8rem; margin-bottom: 8px; }
+    p.subtitle { color: #666; margin-top: 0; }
+    .card {
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 24px;
+      margin-top: 32px;
+    }
+    .card h2 { margin-top: 0; font-size: 1.2rem; color: #c0392b; }
+    .card p { color: #555; font-size: 0.95rem; }
+    .form-group { margin-bottom: 16px; }
+    label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.9rem; }
+    input[type="text"] {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+    .btn-danger {
+      background: #c0392b;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    .btn-danger:hover { background: #a93226; }
+    .btn-danger:disabled { background: #ccc; cursor: not-allowed; }
+    #status {
+      margin-top: 16px;
+      padding: 12px;
+      border-radius: 6px;
+      display: none;
+    }
+    #status.success { background: #d5f5e3; color: #1e8449; border: 1px solid #a9dfbf; }
+    #status.error { background: #fadbd8; color: #922b21; border: 1px solid #f1948a; }
+  </style>
+</head>
+<body>
+  <h1>Account Settings</h1>
+  <p class="subtitle">Manage your Tailwind Traders Mail subscription</p>
+
+  <div class="card">
+    <h2>&#9888; Delete Account</h2>
+    <p>
+      Permanently deleting your account will remove all of your data, including your
+      subscription and activity history. <strong>This action cannot be undone.</strong>
+    </p>
+    <div class="form-group">
+      <label for="accountKey">Your Account Key</label>
+      <input type="text" id="accountKey" placeholder="Enter your account key" autocomplete="off" />
+    </div>
+    <button class="btn-danger" id="deleteBtn" onclick="confirmDelete()">Delete My Account</button>
+    <div id="status"></div>
+  </div>
+
+  <script>
+    // Pre-fill the key from query string if provided (?key=...)
+    (function() {
+      var params = new URLSearchParams(window.location.search);
+      var key = params.get('key');
+      if (key) {
+        document.getElementById('accountKey').value = key;
+      }
+    })();
+
+    function confirmDelete() {
+      var key = document.getElementById('accountKey').value.trim();
+      if (!key) {
+        showStatus('Please enter your account key.', false);
+        return;
+      }
+      var confirmed = window.confirm(
+        'Are you sure you want to permanently delete your account?\n\n' +
+        'This will remove all your data and cannot be undone.'
+      );
+      if (!confirmed) return;
+      deleteAccount(key);
+    }
+
+    function deleteAccount(key) {
+      var btn = document.getElementById('deleteBtn');
+      btn.disabled = true;
+      btn.textContent = 'Deleting...';
+
+      fetch('/contact/' + encodeURIComponent(key), { method: 'DELETE' })
+        .then(function(response) {
+          if (!response.ok) {
+            return response.json().catch(function() {
+              throw new Error('Request failed with status ' + response.status);
+            }).then(function(data) {
+              var msg = (data && data.data && data.data.message) ? data.data.message : 'Request failed with status ' + response.status;
+              throw new Error(msg);
+            });
+          }
+          return response.json();
+        })
+        .then(function(data) {
+          if (data && data.data && data.data.success) {
+            showStatus('Your account has been permanently deleted.', true);
+            btn.style.display = 'none';
+            document.getElementById('accountKey').disabled = true;
+          } else {
+            var msg = (data && data.data && data.data.message) ? data.data.message : 'An error occurred. Please try again.';
+            showStatus(msg, false);
+            btn.disabled = false;
+            btn.textContent = 'Delete My Account';
+          }
+        })
+        .catch(function(err) {
+          showStatus(err.message || 'An error occurred. Please try again.', false);
+          btn.disabled = false;
+          btn.textContent = 'Delete My Account';
+        });
+    }
+
+    function showStatus(message, success) {
+      var el = document.getElementById('status');
+      el.textContent = message;
+      el.className = success ? 'success' : 'error';
+      el.style.display = 'block';
+    }
+  </script>
+</body>
+</html>

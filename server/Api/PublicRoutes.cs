@@ -45,6 +45,19 @@ public class PublicRoutes{
       return op;
     });
 
+    app.MapDelete("/contact/{key}", (string key, [FromServices] IDb db) => {
+      using(var conn = db.Connect()){
+        var cmd = new DeleteContactCommand(key);
+        var result = cmd.Execute(conn);
+        return result;
+      }
+    }).WithOpenApi(op => {
+      op.Summary = "Permanently delete your account";
+      op.Description = "Permanently deletes a contact's account and all associated data";
+      op.Parameters[0].Description = "This is the contact's unique key";
+      return op;
+    });
+
     app.MapPost("/signup", async ([FromBody] SignUpRequest req,  [FromServices] IDb db) => {
       var contact = new Contact{
         Email = req.Email,
