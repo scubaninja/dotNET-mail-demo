@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Account Settings - Tailwind Traders Mail</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 40px 20px;
+      color: #333;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 8px;
+    }
+    .subtitle {
+      color: #666;
+      margin-bottom: 32px;
+    }
+    .card {
+      background: #fff;
+      border-radius: 8px;
+      padding: 24px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      margin-bottom: 24px;
+    }
+    .card h2 {
+      font-size: 1.1rem;
+      margin-top: 0;
+      margin-bottom: 8px;
+    }
+    .card p {
+      color: #555;
+      margin-top: 0;
+      margin-bottom: 16px;
+      font-size: 0.95rem;
+    }
+    .danger-zone {
+      border: 1px solid #fca5a5;
+    }
+    .danger-zone h2 {
+      color: #dc2626;
+    }
+    label {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    input[type="number"] {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 1rem;
+      box-sizing: border-box;
+      margin-bottom: 16px;
+    }
+    input[type="number"]:focus {
+      outline: none;
+      border-color: #ef4444;
+      box-shadow: 0 0 0 3px rgba(239,68,68,0.15);
+    }
+    .btn-danger {
+      background: #dc2626;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 10px 20px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .btn-danger:hover {
+      background: #b91c1c;
+    }
+    .btn-danger:disabled {
+      background: #fca5a5;
+      cursor: not-allowed;
+    }
+    #result-msg {
+      margin-top: 16px;
+      padding: 12px;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      display: none;
+    }
+    #result-msg.success {
+      background: #dcfce7;
+      color: #166534;
+      border: 1px solid #86efac;
+    }
+    #result-msg.error {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fca5a5;
+    }
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.active {
+      display: flex;
+    }
+    .modal {
+      background: #fff;
+      border-radius: 10px;
+      padding: 28px;
+      max-width: 420px;
+      width: 90%;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    }
+    .modal h3 {
+      margin-top: 0;
+      color: #dc2626;
+    }
+    .modal p {
+      color: #555;
+      margin-bottom: 24px;
+    }
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+    }
+    .btn-cancel {
+      background: #f3f4f6;
+      color: #374151;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      padding: 10px 20px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .btn-cancel:hover {
+      background: #e5e7eb;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Account Settings</h1>
+    <p class="subtitle">Manage your Tailwind Traders Mail account preferences.</p>
+
+    <div class="card danger-zone">
+      <h2>&#9888; Delete Account</h2>
+      <p>
+        Permanently delete your account and all associated data. This action
+        <strong>cannot be undone</strong>. All your contact information,
+        activity history, and subscriptions will be removed.
+      </p>
+      <label for="contact-id">Contact ID</label>
+      <input
+        type="number"
+        id="contact-id"
+        placeholder="Enter your contact ID"
+        min="1"
+      />
+      <button class="btn-danger" id="delete-btn" onclick="requestDelete()">
+        Delete My Account
+      </button>
+      <div id="result-msg"></div>
+    </div>
+  </div>
+
+  <!-- Confirmation Modal -->
+  <div class="modal-overlay" id="confirm-modal">
+    <div class="modal">
+      <h3>Confirm Account Deletion</h3>
+      <p>
+        Are you sure you want to permanently delete your account? This will
+        remove all your data and cannot be undone.
+      </p>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+        <button class="btn-danger" id="confirm-delete-btn" onclick="confirmDelete()">
+          Yes, Delete My Account
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let pendingContactId = null;
+
+    function requestDelete() {
+      const idInput = document.getElementById('contact-id');
+      const id = parseInt(idInput.value, 10);
+      if (!id || id < 1) {
+        showResult(false, 'Please enter a valid contact ID.');
+        return;
+      }
+      pendingContactId = id;
+      document.getElementById('confirm-delete-btn').disabled = false;
+      document.getElementById('confirm-modal').classList.add('active');
+    }
+
+    function closeModal() {
+      pendingContactId = null;
+      document.getElementById('confirm-modal').classList.remove('active');
+    }
+
+    async function confirmDelete() {
+      if (!pendingContactId) return;
+
+      const confirmBtn = document.getElementById('confirm-delete-btn');
+      const deleteBtn = document.getElementById('delete-btn');
+      confirmBtn.disabled = true;
+      deleteBtn.disabled = true;
+      closeModal();
+
+      try {
+        const response = await fetch(`/admin/contacts/${pendingContactId}`, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        const data = await response.json();
+        if (response.ok && data.success) {
+          showResult(true, data.message || 'Account permanently deleted.');
+          document.getElementById('contact-id').value = '';
+        } else {
+          showResult(false, data.message || 'Failed to delete account. Please try again.');
+          deleteBtn.disabled = false;
+        }
+      } catch (err) {
+        showResult(false, 'An unexpected error occurred. Please try again.');
+        deleteBtn.disabled = false;
+      }
+    }
+
+    function showResult(success, message) {
+      const el = document.getElementById('result-msg');
+      el.className = success ? 'success' : 'error';
+      el.textContent = message;
+      el.style.display = 'block';
+    }
+  </script>
+</body>
+</html>

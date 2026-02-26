@@ -12,6 +12,11 @@ public class ContactSearchResponse{
   public IEnumerable<Contact> Contacts { get; set; } = new List<Contact>();
 }
 
+public class DeleteContactResponse{
+  public bool Success { get; set; }
+  public string Message { get; set; } = string.Empty;
+}
+
 public class ContactRoutes{
   private ContactRoutes()
   {
@@ -35,6 +40,25 @@ public class ContactRoutes{
       return op;
     }).Produces<ContactSearchResponse>()
     .Produces(500);
+
+    app.MapDelete("/admin/contacts/{id}", (int id, [FromServices] IDb db) => {
+      using var conn = db.Connect();
+      var result = new DeleteContactCommand(id).Execute(conn);
+      if(result.Deleted > 0){
+        return Results.Ok(new DeleteContactResponse{ Success = true, Message = "Account permanently deleted" });
+      }
+      if(result.Deleted < 0){
+        return Results.Problem("An error occurred while deleting the account");
+      }
+      return Results.NotFound(new DeleteContactResponse{ Success = false, Message = "Contact not found" });
+    }).WithOpenApi(op => {
+      op.Summary = "Permanently delete a contact account";
+      op.Description = "Permanently deletes a contact and all associated data. This action cannot be undone.";
+      op.Parameters[0].Description = "The contact's unique ID";
+      return op;
+    }).Produces<DeleteContactResponse>(StatusCodes.Status200OK)
+    .Produces<DeleteContactResponse>(StatusCodes.Status404NotFound)
+    .Produces(StatusCodes.Status500InternalServerError);
   }
 }
 public interface IQuantifiedList{
