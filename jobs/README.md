@@ -1,20 +1,20 @@
 # The Jobs Service for Tailwind Traders Mail Service
 
-jobs uses [mage](https://magefile.org/) a [magefile.go](./magefile.go) to run "jobs" both locally and within a container.
+jobs uses [mage](https://magefile.org/) and a [magefile.go](./magefile.go) to run "jobs" both locally and within a container.
 
-We support a more flexible container, [dev.Dockerfile](./dev.Dockerfile), and smaller and more secure container, [Dockerfile](./Dockerfile).
+We support a more flexible container, [dev.Dockerfile](./dev.Dockerfile), and a smaller, more secure container, [Dockerfile](./Dockerfile).
 
-Finally, we use [GitHub Actions Workflows](./.github/workflows/build-and-publish.yaml) to build and push our container image
+We also use [GitHub Actions Workflows](./.github/workflows/build-and-publish.yaml) to build and push our container image
 to GitHub Packages [Container Registry](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry).
 
-Mage targets prefixed with `docker:*` are designed to help our
+Mage targets prefixed with `docker:*` help our
 local "inner loop" during development and testing.
 
 Common use cases include:
 - Running the resulting container image on a serverless platform (e.g. Azure Container Apps), on Kubernetes, or a VM.
 - Cloning and running mage directly, or pre-compiling a binary, to run on remote compute such as a VM.
 
-See [docs/](./docs/) for for more documentation, or run `mage` to see currently available mage targets as follows:
+See [docs/](./docs/) for more documentation, or run `mage` to see currently available mage targets as follows:
 
 ```
 $ mage

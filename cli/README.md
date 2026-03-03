@@ -1,8 +1,15 @@
 # The Tailwind Mail App
 
-This is a prototype for now, using Node and Commander, which I know well. The goal is to create a CLI that reads in and parses markdown files, which will be used for broadcasts and, eventually, sequences.
+This CLI, built with Node and Commander, reads and parses Markdown files to create and send email broadcasts. Each Markdown file contains YAML frontmatter with the subject, summary, slug, and target tag, followed by the email body.
 
-The markdown bits will contain all the data needed for the broadcast.
+The CLI provides commands to:
+
+- **Initialize** a local `/mail` directory structure for broadcasts, contacts, and sent emails
+- **Create** new broadcast templates (optionally using AI to generate the email body)
+- **Validate** a broadcast against the API and display the subscriber count
+- **Send** a broadcast by queueing it through the API
+- **Search** contacts by email or name
+- **Tag** contacts in bulk from a CSV file
 
 ## Running Things
 
