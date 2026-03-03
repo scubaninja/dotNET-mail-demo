@@ -1,6 +1,6 @@
 # Documentation
 
-Documentation for this project is stored in docs directory. Some documentation is linked from this README, but others are unlinked.
+The docs directory contains documentation for this project. This README links to some documents, but not all.
 
 ## Next steps
 

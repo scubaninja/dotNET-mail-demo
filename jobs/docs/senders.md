@@ -4,16 +4,16 @@ The `message` job (and `message:*` targets) combine senders and queuers to send 
 
 ## Test
 
-This queuer is used for testing. It does not send any emails, but instead logs the email to the console using the `log/slog` package.
+Use this sender for testing. It does not send any emails, but instead logs the email to the console using the `log/slog` package.
 
-We recommend using this sender if you are developing a new sender.
+We recommend using this sender when you develop a new one.
 
 ## Azure Communication Services
 
-Azure Communication Service is the recommended sender for sending emails in production. We have written a wrapper for the REST API at [azurecontainerservices.go](../senders/azurecontainerservices.go).
+We recommend Azure Communication Services as your sender for production emails. We wrote a wrapper for the REST API at [azurecontainerservices.go](../senders/azurecontainerservices.go).
 
 ## SMTP
 
-This queuer sends emails via SMTP.
+This sender delivers emails via SMTP.
 
-We recommend either a production SMTP service, such as Twiliio Sendgrid, or a development SMTP service such as ethereal.email.
+We recommend either a production SMTP service, such as Twilio Sendgrid, or a development SMTP service such as ethereal.email.

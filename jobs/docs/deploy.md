@@ -2,9 +2,9 @@
 
 ## Bicep
 
-We use [Bicep](https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/overview?tabs=bicep) to deploy resources to Azure. All deployment scripts are located in the [deploy/](../deploy) directory.
+We use [Bicep](https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/overview?tabs=bicep) to deploy resources to Azure. The [deploy/](../deploy) directory contains all deployment scripts.
 
-These are deployable as-is, or `deploy:*` [magefile](../magefile.go) targets. For example:
+You can deploy these as-is, or use the `deploy:*` [magefile](../magefile.go) targets. For example:
 
 ```bash
 # deploy compute into a stand-alone resource group
@@ -25,7 +25,7 @@ mage deploy:empty 231000-storage
 
 ## Compute
 
-We support, or will support, deployment of jobs to the following cloud native compute platforms:
+We support, or plan to support, deployment of jobs to the following cloud native compute platforms:
 
 - Azure Virtual Machines
 - Azure Container Instances ([view](../deploy/azure-container-apps.bicep))
@@ -43,10 +43,10 @@ We support the deployment of the following storage platforms:
 - Azure Container Registry
 - Azure Database for Postgres (Optional)
 
-All of these are deployable via the [deploy/main.bicep](../deploy/main.bicep).
+Deploy all of these via [deploy/main.bicep](../deploy/main.bicep).
 
-Role Based Access Control (RBAC) for the currently logged in user is deployed via [deploy/rbac.bicep](../deploy/rbac.bicep).
+Deploy Role Based Access Control (RBAC) for the currently logged in user via [deploy/rbac.bicep](../deploy/rbac.bicep).
 
 We consider Blob Storage, Service Bus, Key Vault and Container Registry to be "core" storage platforms and deploy them together by default, as they are key to many workflows, and cost effective.
 
-Azure Database for Postgres is highly recommended, though we make its deployment optional as it comes at a higher cost.
+We highly recommend Azure Database for Postgres, though we make its deployment optional as it comes at a higher cost.

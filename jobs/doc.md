@@ -1,6 +1,6 @@
 # Documentation
 
-Documentation for this project is stored in docs directory. Some documentation is linked from this README, but others are unlinked.
+The docs directory contains documentation for this project. This README links to some documents, but not all.
 
 ## Next steps
 
@@ -8,18 +8,18 @@ Documentation for this project is stored in docs directory. Some documentation i
 - [Deploy](deploy.md)
 # Containers
 
-This application can be run locally or on a VM with Go and Mage, or built as a container.
+You can run this application locally or on a VM with Go and Mage, or build it as a container.
 
-Our `jobs` container is built using the Dockerfiles, [Dockerfile](../Dockerfile) and [dev.Dockerfile](../dev.Dockerfile).
+We build our `jobs` container using the Dockerfiles, [Dockerfile](../Dockerfile) and [dev.Dockerfile](../dev.Dockerfile).
 
 The [build-and-publish.yaml](../.github/workflows/build-and-publish.yaml) GitHub Action builds and publishes the `jobs` container, from the `latest` branch, to GitHub Container Registry.
 # Deploy
 
 ## Bicep
 
-We use [Bicep](https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/overview?tabs=bicep) to deploy resources to Azure. All deployment scripts are located in the [deploy/](../deploy) directory.
+We use [Bicep](https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/overview?tabs=bicep) to deploy resources to Azure. The [deploy/](../deploy) directory contains all deployment scripts.
 
-These are deployable as-is, or `deploy:*` [magefile](../magefile.go) targets. For example:
+You can deploy these as-is, or use the `deploy:*` [magefile](../magefile.go) targets. For example:
 
 ```bash
 # deploy compute into a stand-alone resource group
@@ -40,7 +40,7 @@ mage deploy:empty 231000-storage
 
 ## Compute
 
-We support, or will support, deployment of jobs to the following cloud native compute platforms:
+We support, or plan to support, deployment of jobs to the following cloud native compute platforms:
 
 - Azure Virtual Machines
 - Azure Container Instances ([view](../deploy/azure-container-apps.bicep))
@@ -58,13 +58,13 @@ We support the deployment of the following storage platforms:
 - Azure Container Registry
 - Azure Database for Postgres (Optional)
 
-All of these are deployable via the [deploy/main.bicep](../deploy/main.bicep).
+Deploy all of these via [deploy/main.bicep](../deploy/main.bicep).
 
-Role Based Access Control (RBAC) for the currently logged in user is deployed via [deploy/rbac.bicep](../deploy/rbac.bicep).
+Deploy Role Based Access Control (RBAC) for the currently logged in user via [deploy/rbac.bicep](../deploy/rbac.bicep).
 
 We consider Blob Storage, Service Bus, Key Vault and Container Registry to be "core" storage platforms and deploy them together by default, as they are key to many workflows, and cost effective.
 
-Azure Database for Postgres is highly recommended, though we make its deployment optional as it comes at a higher cost.
+We highly recommend Azure Database for Postgres, though we make its deployment optional as it comes at a higher cost.
 # Environment variables
 
 The following are example environment variables for local development, and deployment to Azure.
@@ -99,19 +99,19 @@ export ETHEREAL_SMTP_SERVER='smtp.ethereal.email'
 #export SMTP_PASSWORD=$ETHEREAL_PASSWORD
 ```# Queuers
 
-The `message` job (and `message:*` targets) combine senders and queuers to send emails. We support the following senders:
+The `message` job (and `message:*` targets) combine senders and queuers to send emails. We support the following queuers:
 
 ## Test
 
-This queuer is used for testing. It does not send any emails, but instead logs the email to the console using the `log/slog` package.
+Use this queuer for testing. It does not send any emails, but instead logs the email to the console using the `log/slog` package.
 
-We recommend using this queuer if you are developing a new queuer.
+We recommend using this queuer when you develop a new one.
 
 ## Azure Service Bus
 
-Azure Service Bus is used for produciton queues.
+Azure Service Bus handles production queues.
 
-In order to use this queuer, you must set `AZURE_SERVICEBUS_CONNECTION_STRING` and `AZURE_SERVICEBUS_QUEUE_NAME` environment variables.
+To use this queuer, set the `AZURE_SERVICEBUS_CONNECTION_STRING` and `AZURE_SERVICEBUS_QUEUE_NAME` environment variables.
 # Requirements
 
 - An **Azure Subscription** (e.g. [Free](https://aka.ms/azure-free-account) or [Student](https://aka.ms/azure-student-account) account)
@@ -125,19 +125,19 @@ The `message` job (and `message:*` targets) combine senders and queuers to send 
 
 ## Test
 
-This queuer is used for testing. It does not send any emails, but instead logs the email to the console using the `log/slog` package.
+Use this sender for testing. It does not send any emails, but instead logs the email to the console using the `log/slog` package.
 
-We recommend using this sender if you are developing a new sender.
+We recommend using this sender when you develop a new one.
 
 ## Azure Communication Services
 
-Azure Communication Service is the recommended sender for sending emails in production. We have written a wrapper for the REST API at [azurecontainerservices.go](../senders/azurecontainerservices.go).
+We recommend Azure Communication Services as your sender for production emails. We wrote a wrapper for the REST API at [azurecontainerservices.go](../senders/azurecontainerservices.go).
 
 ## SMTP
 
-This queuer sends emails via SMTP.
+This sender delivers emails via SMTP.
 
-We recommend either a production SMTP service, such as Twiliio Sendgrid, or a development SMTP service such as ethereal.email.
+We recommend either a production SMTP service, such as Twilio Sendgrid, or a development SMTP service such as ethereal.email.
 # vNext
 
 The following is a list of features that are currently in progress, or planned for the future:

@@ -2,7 +2,9 @@
 
 This is the .NET Minimal API backend service for the Tailwind Traders list server.
 
-This API is all about sending transactional emails and queueing up batch sends to an email list. For it to work properly, you'll need to set a few ENV variables:
+This API sends transactional emails and queues batch sends to an email list. It exposes public endpoints for contact signup, unsubscribe, and link tracking, as well as admin endpoints for searching contacts, validating broadcasts, queueing campaigns, generating email content with AI, and bulk-tagging contacts. A background service polls the database and delivers pending messages via SMTP.
+
+For it to work properly, you'll need to set a few ENV variables:
 
 ```
 ASPNETCORE_ENVIRONMENT="Development"
