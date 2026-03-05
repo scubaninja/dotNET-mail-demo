@@ -6,7 +6,7 @@ APPNAME="$RG-$RANDOM"
 #You can get a list of locations by running 
 #az account list-locations --query [].name
 LOCATION="westus"
-RUNTIME="DOTNETCORE:7.0"
+RUNTIME="DOTNETCORE:8.0"
 ZIPSCRIPT="./Deployment/Azure/zip.sh"
 ENVFILE="./Deployment/.env"
 
@@ -71,7 +71,7 @@ echo "rm -R bin/Release" >> $ZIPSCRIPT
 echo "dotnet publish --configuration Release" >> $ZIPSCRIPT
 
 
-echo "cd bin/Release/net7.0/publish/" >>$ZIPSCRIPT
+echo "cd bin/Release/net8.0/publish/" >>$ZIPSCRIPT
 echo "zip -r ../../../../Deployment/Azure/deploy.zip . -q"  >> $ZIPSCRIPT
 echo "cd -" >> $ZIPSCRIPT
 
