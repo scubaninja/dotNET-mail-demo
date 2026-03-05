@@ -1,0 +1,166 @@
+# Azure DevOps Pipeline for Tailwind Mail Demo
+# Builds, tests, and deploys the .NET 8 server application to Azure App Service.
+#
+# Required pipeline variables / variable group "azure-deploy":
+#   AZURE_SUBSCRIPTION       - Azure subscription name or ID
+#   AZURE_WEBAPP_NAME        - Azure App Service name
+#
+# Required service connection (create in Project Settings > Service connections):
+#   AzureServiceConnection   - Azure Resource Manager service connection linked to AZURE_SUBSCRIPTION
+
+trigger:
+  branches:
+    include:
+      - main
+      - latest
+
+pr:
+  branches:
+    include:
+      - main
+      - latest
+
+variables:
+  dotnetVersion: '8.x'
+  buildConfiguration: 'Release'
+  publishOutputDir: '$(Build.ArtifactStagingDirectory)/publish'
+
+stages:
+  # ─────────────────────────────────────────────────────────────
+  # Stage 1: Build
+  # Restores, builds, and publishes the .NET application.
+  # ─────────────────────────────────────────────────────────────
+  - stage: Build
+    displayName: Build
+    jobs:
+      - job: BuildJob
+        displayName: Restore, Build & Publish
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - task: UseDotNet@2
+            displayName: Setup .NET $(dotnetVersion)
+            inputs:
+              packageType: sdk
+              version: $(dotnetVersion)
+              installationPath: $(Agent.ToolsDirectory)/dotnet
+
+          - task: DotNetCoreCLI@2
+            displayName: Restore dependencies
+            inputs:
+              command: restore
+              projects: 'server/Tailwind.Mail.csproj'
+
+          - task: DotNetCoreCLI@2
+            displayName: Build
+            inputs:
+              command: build
+              projects: 'server/Tailwind.Mail.csproj'
+              arguments: '--configuration $(buildConfiguration) --no-restore'
+
+          - task: DotNetCoreCLI@2
+            displayName: Publish
+            inputs:
+              command: publish
+              projects: 'server/Tailwind.Mail.csproj'
+              arguments: '--configuration $(buildConfiguration) --no-build --output $(publishOutputDir)'
+              publishWebProjects: false
+              zipAfterPublish: true
+
+          - task: PublishBuildArtifacts@1
+            displayName: Upload build artifact
+            inputs:
+              pathToPublish: $(publishOutputDir)
+              artifactName: server-drop
+              publishLocation: Container
+
+  # ─────────────────────────────────────────────────────────────
+  # Stage 2: Test
+  # Spins up PostgreSQL, applies the schema, and runs xUnit tests.
+  # ─────────────────────────────────────────────────────────────
+  - stage: Test
+    displayName: Test
+    dependsOn: Build
+    jobs:
+      - job: TestJob
+        displayName: Run xUnit Tests
+        pool:
+          vmImage: ubuntu-latest
+        services:
+          postgres:
+            image: postgres
+            env:
+              POSTGRES_USER: user
+              POSTGRES_DB: tailwind
+              POSTGRES_HOST_AUTH_METHOD: trust
+            ports:
+              - 5432:5432
+        steps:
+          - task: UseDotNet@2
+            displayName: Setup .NET $(dotnetVersion)
+            inputs:
+              packageType: sdk
+              version: $(dotnetVersion)
+              installationPath: $(Agent.ToolsDirectory)/dotnet
+
+          - script: |
+              until pg_isready -h localhost -U user; do
+                echo "Waiting for PostgreSQL..."
+                sleep 2
+              done
+              psql -h localhost -U user -d tailwind -f db/db.sql --quiet
+            displayName: Wait for PostgreSQL and apply schema
+            env:
+              PGPASSWORD: ''
+
+          - task: DotNetCoreCLI@2
+            displayName: Run tests
+            inputs:
+              command: test
+              projects: 'server/Tailwind.Mail.csproj'
+              arguments: '--configuration Debug --verbosity normal --collect:"XPlat Code Coverage"'
+              publishTestResults: true
+            env:
+              ASPNETCORE_ENVIRONMENT: Development
+              DATABASE_URL: 'Host=localhost;Database=tailwind;Username=user;'
+
+          - task: PublishCodeCoverageResults@2
+            displayName: Publish code coverage
+            inputs:
+              summaryFileLocation: '$(Agent.TempDirectory)/**/coverage.cobertura.xml'
+            condition: succeededOrFailed()
+
+  # ─────────────────────────────────────────────────────────────
+  # Stage 3: Deploy
+  # Deploys the published artifact to Azure App Service.
+  # Runs only for pushes to main or latest (not PRs).
+  # ─────────────────────────────────────────────────────────────
+  - stage: Deploy
+    displayName: Deploy to Azure App Service
+    dependsOn: Test
+    condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+    jobs:
+      - deployment: DeployJob
+        displayName: Deploy
+        pool:
+          vmImage: ubuntu-latest
+        environment: production
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: DownloadBuildArtifacts@1
+                  displayName: Download build artifact
+                  inputs:
+                    artifactName: server-drop
+                    downloadPath: $(Pipeline.Workspace)
+
+                - task: AzureWebApp@1
+                  displayName: Deploy to Azure App Service
+                  inputs:
+                    azureSubscription: AzureServiceConnection
+                    appType: webAppLinux
+                    appName: $(AZURE_WEBAPP_NAME)
+                    package: '$(Pipeline.Workspace)/server-drop/**/*.zip'
+                    runtimeStack: 'DOTNETCORE|8.0'
+                    startUpCommand: ''

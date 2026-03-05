@@ -4,7 +4,7 @@ In this directory are deployment scripts ready to use. This requires that you ha
 
 ## Setting up your Azure Resources
 
-To run this application you need a web server that runs .NET 7, that's it. Node is not required as all of the front end components are built during `dotnet build`, which happens when you `dotnet publish`.
+To run this application you need a web server that runs .NET 8, that's it. Node is not required as all of the front end components are built during `dotnet build`, which happens when you `dotnet publish`.
 
 For convenience, we've added a setup script in this here directory called `app_service.sh`, which is a script that creates the necessary services on Azure for you. 
 
@@ -34,7 +34,7 @@ Yay for Make!
 
 ## What's going on during deployment
 
-Once everything is ready to go (after `dotnet publish`) your deployment artifacts will be located in `/bin/Release/net7.0/publish`, which includes the Svelte application, which is built along with the ASP.NET application.
+Once everything is ready to go (after `dotnet publish`) your deployment artifacts will be located in `/bin/Release/net8.0/publish`, which includes the Svelte application, which is built along with the ASP.NET application.
 
 The built Svelte application is located in `wwwroot` in that directory which is where it needs to live.
 
