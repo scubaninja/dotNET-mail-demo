@@ -1,0 +1,31 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namePrefix: ""
+namespace: tailwind-mail
+
+resources:
+  - ../../base
+
+# Image is set at deploy time by the CI/CD pipeline:
+#   kustomize edit set image tailwind-mail-server=<acr>.azurecr.io/tailwind-mail-server:<tag>
+images:
+  - name: tailwind-mail-server
+    newName: tailwindmailproductionacr.azurecr.io/tailwind-mail-server
+    newTag: latest
+
+patches:
+  - path: patch-deployment.yaml
+    target:
+      kind: Deployment
+      name: tailwind-mail
+  - path: patch-ingress.yaml
+    target:
+      kind: Ingress
+      name: tailwind-mail
+
+configMapGenerator:
+  - name: tailwind-mail-config
+    behavior: merge
+    literals:
+      - ASPNETCORE_ENVIRONMENT=Production

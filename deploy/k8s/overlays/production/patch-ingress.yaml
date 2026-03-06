@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: tailwind-mail
+  namespace: tailwind-mail
+spec:
+  rules:
+    - host: tailwind-mail.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: tailwind-mail
+                port:
+                  name: http
