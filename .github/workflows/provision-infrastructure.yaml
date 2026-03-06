@@ -1,0 +1,129 @@
+name: Provision Infrastructure (AKS + ACR)
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+      resource_group:
+        description: 'Azure resource group name'
+        required: true
+        type: string
+      validate_only:
+        description: 'Validate template without deploying'
+        required: false
+        default: 'false'
+        type: boolean
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  validate:
+    name: Validate Bicep template
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Azure login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Validate Bicep template
+        run: |
+          az deployment group validate \
+            --resource-group "${{ inputs.resource_group }}" \
+            --template-file deploy/iac/main.bicep \
+            --parameters deploy/iac/parameters/${{ inputs.environment }}.bicepparam \
+            --output table
+
+  deploy:
+    name: Deploy infrastructure
+    needs: validate
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    # Skip the actual deployment when validate_only is true
+    if: inputs.validate_only == 'false'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Azure login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Create resource group if it does not exist
+        run: |
+          az group create \
+            --name "${{ inputs.resource_group }}" \
+            --location eastus \
+            --tags environment=${{ inputs.environment }} application=tailwind-mail managedBy=bicep \
+            --output table
+
+      - name: Deploy Bicep template (what-if preview)
+        run: |
+          az deployment group what-if \
+            --resource-group "${{ inputs.resource_group }}" \
+            --template-file deploy/iac/main.bicep \
+            --parameters deploy/iac/parameters/${{ inputs.environment }}.bicepparam \
+            --output table
+
+      - name: Deploy Bicep template
+        id: deploy
+        run: |
+          az deployment group create \
+            --name "tailwind-mail-${{ inputs.environment }}-$(date +%Y%m%d%H%M%S)" \
+            --resource-group "${{ inputs.resource_group }}" \
+            --template-file deploy/iac/main.bicep \
+            --parameters deploy/iac/parameters/${{ inputs.environment }}.bicepparam \
+            --output json | tee /tmp/deployment-output.json
+
+          echo "aks_cluster_name=$(jq -r '.properties.outputs.aksClusterName.value' /tmp/deployment-output.json)" >> "$GITHUB_OUTPUT"
+          echo "acr_login_server=$(jq -r '.properties.outputs.acrLoginServer.value' /tmp/deployment-output.json)" >> "$GITHUB_OUTPUT"
+          echo "acr_name=$(jq -r '.properties.outputs.acrName.value' /tmp/deployment-output.json)" >> "$GITHUB_OUTPUT"
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v3
+
+      - name: Get AKS credentials
+        run: |
+          az aks get-credentials \
+            --resource-group "${{ inputs.resource_group }}" \
+            --name "${{ steps.deploy.outputs.aks_cluster_name }}" \
+            --overwrite-existing
+
+      - name: Install NGINX ingress controller
+        run: |
+          helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+          helm repo update
+          helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx \
+            --namespace ingress-nginx \
+            --create-namespace \
+            --set controller.replicaCount=2 \
+            --wait --timeout 5m
+
+      - name: Print deployment outputs
+        run: |
+          echo "### Infrastructure deployed successfully 🎉" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Output | Value |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|--------|-------|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| AKS Cluster | ${{ steps.deploy.outputs.aks_cluster_name }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| ACR Login Server | ${{ steps.deploy.outputs.acr_login_server }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Resource Group | ${{ inputs.resource_group }} |" >> "$GITHUB_STEP_SUMMARY"

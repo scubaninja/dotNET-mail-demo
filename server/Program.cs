@@ -8,6 +8,7 @@ var config = Viper.Config("Integration");
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddHealthChecks();
 builder.Services.AddScoped<IDb, DB>();
 builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
 if(config.Get("SEND_WORKER") == "local"){
@@ -36,6 +37,8 @@ builder.Services.AddSwaggerGen(options =>
 
 var app = builder.Build();
 
+app.MapHealthChecks("/health/live");
+app.MapHealthChecks("/health/ready");
 app.UseSwagger();
 app.UseSwaggerUI(options =>
 {

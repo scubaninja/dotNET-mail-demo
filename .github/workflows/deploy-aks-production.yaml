@@ -1,0 +1,139 @@
+name: Deploy to Production (AKS)
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: 'Container image tag to deploy (e.g. sha-abc1234)'
+        required: true
+        type: string
+      confirm:
+        description: 'Type "deploy" to confirm production deployment'
+        required: true
+        type: string
+
+env:
+  IMAGE_NAME: tailwind-mail-server
+  ENVIRONMENT: production
+  KUSTOMIZE_OVERLAY: deploy/k8s/overlays/production
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  # Gate: validate the confirmation input before doing anything
+  validate-inputs:
+    name: Validate deployment inputs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check confirmation
+        run: |
+          if [ "${{ inputs.confirm }}" != "deploy" ]; then
+            echo "::error::Production deployment requires confirm input to be exactly 'deploy'. Got: '${{ inputs.confirm }}'"
+            exit 1
+          fi
+
+  deploy-production:
+    name: Deploy to production
+    needs: validate-inputs
+    runs-on: ubuntu-latest
+    # The 'production' GitHub Environment enforces required reviewers before this job runs
+    environment:
+      name: production
+      url: https://tailwind-mail.example.com
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Azure login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Get AKS credentials
+        run: |
+          az aks get-credentials \
+            --resource-group "${{ secrets.AZURE_RESOURCE_GROUP }}" \
+            --name "${{ secrets.AZURE_AKS_CLUSTER_NAME_PRODUCTION }}" \
+            --overwrite-existing
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v3
+
+      - name: Install kustomize
+        uses: imranismail/setup-kustomize@v2
+
+      - name: Get ACR login server
+        id: acr_login
+        run: |
+          ACR_LOGIN_SERVER=$(az acr show \
+            --name "${{ secrets.AZURE_ACR_NAME }}" \
+            --resource-group "${{ secrets.AZURE_RESOURCE_GROUP }}" \
+            --query loginServer --output tsv)
+          echo "acr_login_server=${ACR_LOGIN_SERVER}" >> "$GITHUB_OUTPUT"
+
+      - name: Verify image exists in ACR before deploying
+        run: |
+          az acr repository show-tags \
+            --name "${{ secrets.AZURE_ACR_NAME }}" \
+            --repository "${{ env.IMAGE_NAME }}" \
+            --query "contains(@, '${{ inputs.image_tag }}')" \
+            --output tsv | grep -q true || \
+          (echo "::error::Image tag '${{ inputs.image_tag }}' not found in ACR. Aborting." && exit 1)
+
+      - name: Set image in kustomize overlay
+        working-directory: ${{ env.KUSTOMIZE_OVERLAY }}
+        run: |
+          kustomize edit set image \
+            tailwind-mail-server=${{ steps.acr_login.outputs.acr_login_server }}/${{ env.IMAGE_NAME }}:${{ inputs.image_tag }}
+
+      - name: Create namespace (idempotent)
+        run: kubectl apply -f deploy/k8s/base/namespace.yaml
+
+      - name: Create / update app secrets
+        run: |
+          kubectl create secret generic tailwind-mail-secrets \
+            --namespace tailwind-mail \
+            --from-literal=DATABASE_URL="${{ secrets.DATABASE_URL }}" \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Render and validate manifests (server-side dry-run)
+        run: kustomize build ${{ env.KUSTOMIZE_OVERLAY }} | kubectl apply --dry-run=server -f -
+
+      - name: Apply manifests
+        run: kustomize build ${{ env.KUSTOMIZE_OVERLAY }} | kubectl apply -f -
+
+      - name: Wait for rollout
+        run: |
+          kubectl rollout status deployment/tailwind-mail \
+            --namespace tailwind-mail \
+            --timeout 10m
+
+      - name: Smoke test — verify pod is ready
+        run: |
+          READY=$(kubectl get deployment tailwind-mail \
+            --namespace tailwind-mail \
+            --output jsonpath='{.status.readyReplicas}')
+          DESIRED=$(kubectl get deployment tailwind-mail \
+            --namespace tailwind-mail \
+            --output jsonpath='{.spec.replicas}')
+          echo "Ready: ${READY}/${DESIRED}"
+          if [ "${READY}" != "${DESIRED}" ]; then
+            echo "::error::Deployment not fully ready (${READY}/${DESIRED} replicas ready)"
+            exit 1
+          fi
+
+      - name: Print deployment summary
+        run: |
+          echo "### Production deployment complete 🎉" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Field | Value |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|-------|-------|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Image | ${{ steps.acr_login.outputs.acr_login_server }}/${{ env.IMAGE_NAME }}:${{ inputs.image_tag }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Cluster | ${{ secrets.AZURE_AKS_CLUSTER_NAME_PRODUCTION }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Namespace | tailwind-mail |" >> "$GITHUB_STEP_SUMMARY"
+          kubectl get pods -n tailwind-mail
