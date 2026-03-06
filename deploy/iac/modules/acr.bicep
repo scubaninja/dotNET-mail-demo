@@ -11,7 +11,7 @@ param acrName string
 param sku string = 'Standard'
 
 @description('Principal ID of the AKS kubelet managed identity that needs AcrPull access')
-param aksCubeletPrincipalId string
+param aksKubeletPrincipalId string
 
 @description('Resource tags')
 param tags object = {}
@@ -36,11 +36,11 @@ var acrPullRoleId = '7f951dda-4ed3-4680-a7ca-43fe172d538d'
 
 // Grant AKS kubelet identity AcrPull on the registry
 resource acrPullAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(acr.id, aksCubeletPrincipalId, acrPullRoleId)
+  name: guid(acr.id, aksKubeletPrincipalId, acrPullRoleId)
   scope: acr
   properties: {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', acrPullRoleId)
-    principalId: aksCubeletPrincipalId
+    principalId: aksKubeletPrincipalId
     principalType: 'ServicePrincipal'
   }
 }

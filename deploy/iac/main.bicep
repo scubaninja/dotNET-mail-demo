@@ -87,7 +87,7 @@ module acr 'modules/acr.bicep' = {
     location: location
     acrName: acrName
     sku: acrSku
-    aksCubeletPrincipalId: aks.outputs.kubeletPrincipalId
+    aksKubeletPrincipalId: aks.outputs.kubeletPrincipalId
     tags: tags
   }
 }
