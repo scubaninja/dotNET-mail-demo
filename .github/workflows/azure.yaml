@@ -1,26 +1,46 @@
-name: Run Azure Login with OIDC
+name: Build and deploy .NET app to Azure App Service
+
 on:
+  push:
+    branches: ['latest']
+    paths:
+      - 'server/**'
   workflow_dispatch:
 
 permissions:
-      id-token: write
-      contents: read
+  id-token: write
+  contents: read
+
+env:
+  DOTNET_VERSION: '8.x'
+  PUBLISH_DIR: server/publish
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     environment: production
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up .NET ${{ env.DOTNET_VERSION }}
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Build and publish
+        run: dotnet publish server/Tailwind.Mail.csproj --configuration Release --output ${{ env.PUBLISH_DIR }}
+
       - name: Azure login
-        uses: azure/login@v1
+        uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-  
-      - name: Azure CLI script
-        uses: azure/CLI@v1
+
+      - name: Deploy to Azure App Service
+        uses: azure/webapps-deploy@v3
         with:
-          azcliversion: latest
-          inlineScript: |
-            az group list
+          app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
+          package: ${{ env.PUBLISH_DIR }}
             
